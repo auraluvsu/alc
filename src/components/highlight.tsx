@@ -7,6 +7,16 @@ const KW = new Set(
    def elif except raise None True False self pass with from yield lambda match case record sealed permits final
    select fallthrough iota global nonlocal assert async await del is lazy`.split(/\s+/),
 )
+// Java gets its own exact list: words like `of`, `map`, `in` and `string` are ordinary identifiers there.
+const KW_JAVA = new Set(
+  `abstract assert boolean break byte case catch char class const continue default do double else enum extends false final finally float for goto if implements import instanceof int interface long native new null package private protected public return short static strictfp super switch synchronized this throw throws transient true try void volatile while`.split(/\s+/),
+)
+// Contextual keywords are ordinary names elsewhere, as in `StructuredTaskScope.open()` or `Request.to(url)`.
+const KW_JAVA_CONTEXTUAL = new Set(
+  `exports module non open opens permits provides record requires sealed to transitive uses var when with yield`.split(/\s+/),
+)
+const isJavaKeyword = (id: string, prev: string, next: string) =>
+  KW_JAVA.has(id) || (KW_JAVA_CONTEXTUAL.has(id) && prev !== '.' && next !== '(')
 const TY = /^(std|size_t|int\d+_t|uint\d+_t|string|string_view|vector|array|map|unordered_map|optional|expected|variant|unique_ptr|shared_ptr|weak_ptr|span|mdspan|print|println|format|cout|cin|cerr|endl|Error|Promise|ostream|istream|thread|jthread|mutex|future|generator|views|ranges)$/
 
 const RE = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"(?:sv|s)?|'(?:\\.|[^'\\])*'|`[^`]*`)|(^[ \t]*#[^\n]*)|(\b0x[\da-fA-F']+\w*|\b\d[\d'.]*(?:e[+-]?\d+)?[a-zA-Z_]*)|([A-Za-z_]\w*)/gm
@@ -30,8 +40,8 @@ export function highlight(src: string, lang?: string): ReactNode[] {
     else if (pp) cls = 'tok-pp'
     else if (num) cls = 'tok-num'
     else if (id) {
-      if (KW.has(id)) cls = 'tok-kw'
-      else if (TY.test(id) || /^[A-Z]/.test(id)) cls = 'tok-ty'
+      if (lang === 'java' ? isJavaKeyword(id, src[m.index - 1], src[m.index + id.length]) : KW.has(id)) cls = 'tok-kw'
+      else if ((lang !== 'java' && TY.test(id)) || /^[A-Z]/.test(id)) cls = 'tok-ty'
       else if (src[m.index + id.length] === '(') cls = 'tok-fn'
     }
     out.push(cls ? <span key={k++} className={cls}>{t}</span> : t)

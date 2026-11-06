@@ -73,6 +73,18 @@ export const LANGUAGES: Language[] = [
     ],
   },
   {
+    id: 'java',
+    name: 'Java',
+    accent: 'accent-java',
+    tagline: 'Java 27, following Horstmann\'s Core Java for the Impatient: classes, interfaces, generics, collections, streams and concurrency, with an added module on object-oriented design.',
+    links: [
+      { label: 'Course', desc: 'The 14-module course with quizzes', to: '/java' },
+      { label: 'Dictionary', desc: 'Searchable syntax and concepts', to: '/java/reference' },
+      { label: 'The Standard', desc: 'The most useful standard library classes and methods', to: '/java/standard' },
+      { label: 'Design', desc: 'Design notes and experiments', to: '/java/design' },
+    ],
+  },
+  {
     id: 'ai',
     name: 'ML & Data',
     accent: 'accent-ml',
