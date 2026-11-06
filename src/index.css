@@ -25,7 +25,7 @@
   --py: #ffd43b; --py-ink: #8a6a00; --py-on: #2b2300;
   --ts: #3178c6; --ts-ink: #2a64a8; --ts-on: #ffffff;
   --go: #00add8; --go-ink: #00799a; --go-on: #ffffff;
-  --java: #d6312b; --java-ink: #b4251f; --java-on: #ffffff;
+  --java: #cc0000; --java-ink: #a80000; --java-on: #ffffff;
   --shadow: 0 1px 2px rgba(120, 70, 80, .06), 0 8px 28px rgba(120, 70, 80, .08);
 
   --f-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
@@ -781,3 +781,50 @@ a { color: var(--brand-deep); }
 .topbar-home:hover, .topbar-home:active { color: var(--ink); border-color: var(--brand); }
 .topbar-home .logo-mark { box-shadow: none; }
 @media (max-width: 440px) { .topbar .logo { font-size: 20px; } }
+
+/* ================= Java section: Java red (#cc0000) with the logo's blue (#007396) on cool neutrals =================
+   Red leads (buttons, active states, headings); blue carries the "newer than the book" callouts and analogies.
+   In dark mode both are lifted so they stay readable on charcoal. */
+:root {
+  --javac: #cc0000; --javac-deep: #a80000; --javac-light: #ff9c94;
+  --javab: #007396; --javab-deep: #005c78;
+  --javac-sheen: linear-gradient(115deg, #a80000 0%, #cc0000 34%, #007396 66%, #005c78 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --javac: #d92b23; --javac-deep: #ff8f87; --javac-light: #ffc0ba; --javab: #39a9c9; --javab-deep: #7fd0e8;
+    --javac-sheen: linear-gradient(115deg, #c21f18 0%, #d92b23 34%, #0a7f9f 66%, #007396 100%); }
+}
+:root[data-theme="dark"] { --javac: #d92b23; --javac-deep: #ff8f87; --javac-light: #ffc0ba; --javab: #39a9c9; --javab-deep: #7fd0e8;
+  --javac-sheen: linear-gradient(115deg, #c21f18 0%, #d92b23 34%, #0a7f9f 66%, #007396 100%); }
+
+.accent-java { --acc: var(--javac); --acc-ink: var(--javac-deep); --acc-sheen: var(--javac-sheen); }
+.lang-card.accent-java { border-top: 4px solid var(--acc); }
+.accent-java .lang-card-name { background: var(--acc-sheen); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 7s ease-in-out infinite; }
+
+:root[data-section="java"] {
+  --brand: var(--javac); --brand-deep: var(--javac-deep); --brand-light: var(--javac-light); --brand-sheen: var(--javac-sheen);
+  --bg: #f5f8fa; --paper: #fdfeff; --ink: #16222a; --muted: #566b77; --line: #d6e3ea; --tint: #e6f1f5;
+  --code-bg: #10202a; --code-fg: #e8f2f6;
+  --shadow: 0 1px 2px rgba(0, 70, 95, .06), 0 8px 28px rgba(0, 70, 95, .08);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-section="java"]:not([data-theme="light"]) {
+    --bg: #11181d; --paper: #182329; --ink: #e8f1f5; --muted: #9db0ba; --line: #2b3f49; --tint: #1e2f38;
+    --code-bg: #0b1419; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+  }
+}
+:root[data-section="java"][data-theme="dark"] {
+  --bg: #11181d; --paper: #182329; --ink: #e8f1f5; --muted: #9db0ba; --line: #2b3f49; --tint: #1e2f38;
+  --code-bg: #0b1419; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+}
+:root[data-section="java"] .callout.new23,
+:root[data-section="java"] .callout.analogy { border-color: var(--javab); }
+:root[data-section="java"] .callout.new23 .label,
+:root[data-section="java"] .callout.analogy .label { color: var(--javab-deep); }
+:root[data-section="java"] .code .bar { color: #9fc0cf; border-bottom-color: rgba(255, 255, 255, .08); }
+:root[data-section="java"] .code .bar .java { color: #ff9c94; }
+:root[data-section="java"] .stepper .src .ln { color: #5a7886; }
+:root[data-section="java"] .tok-kw { color: #ff9c94; }
+:root[data-section="java"] .tok-ty { color: #7fd0e8; }
+:root[data-section="java"] .tok-fn { color: #f4d58d; }
+:root[data-section="java"] .tok-com { color: #728c99; }
