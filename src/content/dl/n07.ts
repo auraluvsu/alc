@@ -104,9 +104,9 @@ full, trainable, trainable / full          # 16.8M vs 65.5k: ≈ 0.4% of the par
       blocks: [
         { kind: 'analogy', text: "News, filings and earnings calls are a huge source of information, and of leakage. The question isn't \"is this headline positive?\" but \"could I have known this, at this time, and did prices already reflect it?\". Timestamps, model knowledge cut-offs and look-ahead in the language model itself all matter." },
         { kind: 'list', items: [
-          '**Timestamp everything** to the second, in UTC, and only use text published before the decision time. Many \"news\" datasets are stamped with dates, not times.',
-          '**LLM look-ahead**: a model pretrained on 2026 text \"knows\" how 2022 turned out. Backtesting with it on 2022 headlines leaks the future. Use models whose training cut-off precedes the test period, or treat results with heavy suspicion.',
-          '**Sentiment ≠ surprise**: \"record profits\" is useless if the market expected more. Combine text signals with expectations (analyst consensus, implied moves).',
+          '**Timestamp everything** to the second, in UTC, and only use text published before the decision time. Many "news" datasets are stamped with dates, not times.',
+          '**LLM look-ahead**: a model pretrained on 2026 text "knows" how 2022 turned out. Backtesting with it on 2022 headlines leaks the future. Use models whose training cut-off precedes the test period, or treat results with heavy suspicion.',
+          '**Sentiment ≠ surprise**: "record profits" is useless if the market expected more. Combine text signals with expectations (analyst consensus, implied moves).',
           '**Cheap first**: embeddings plus a linear model or gradient boosting usually beat elaborate fine-tuning on small labelled sets, and are far easier to validate.',
         ] },
         { kind: 'check', q: 'Why is backtesting with a recent LLM on old headlines risky?', options: ['Tokenisation changed', 'The model\'s pretraining data may include what happened next', 'It\'s slow', 'Old text is shorter'], answer: 1, hint: 'What did the model read during pretraining?', explain: 'Knowledge cut-off must precede the test period.' },

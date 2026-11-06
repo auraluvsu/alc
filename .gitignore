@@ -11,3 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+coverage
+playwright-report
+test-results
+dist-artifact
