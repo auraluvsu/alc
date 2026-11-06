@@ -94,3 +94,18 @@ React 19, TypeScript, Vite 6, ESLint. Fonts are provided by `@fontsource` (Bodon
 ## License
 
 See [LICENSE](LICENSE).
+
+## Testing and CI
+
+| Command | What it runs |
+| --- | --- |
+| `npm test` | Vitest unit + content-integrity + sitemap/SSR tests (`src/**/*.test.ts`) |
+| `npm run test:coverage` | Same, with a v8 coverage report |
+| `npm run verify:build` | After `npm run build`: checks every prerendered page (title, canonical, content) |
+| `npm run test:e2e` | Playwright (Chromium) against `vite preview`; run `npm run build` first |
+| `npm run check` | lint, typecheck, tests, build and build verification in one go |
+
+`npm run build` runs `tsc -b`, the client build, an SSR build, then `scripts/prerender.mjs`, which renders every URL in `public/sitemap.xml` into `dist/`.
+The sitemap is hand-maintained, but `src/sitemap.test.ts` fails if a module/lesson route is missing from it or if it lists a route with no content, so update it when you add content.
+
+A pre-push git hook (installed by `npm install` via `simple-git-hooks`) runs lint, typecheck and unit tests. The full suite, including build verification and E2E, runs in GitHub Actions (`.github/workflows/ci.yml`) on every push and pull request.
