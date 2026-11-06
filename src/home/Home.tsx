@@ -3,7 +3,7 @@ import { Plus } from '../components/Bridge'
 import { to } from '../router'
 import { LANGUAGES, SITE_NAME } from '../site'
 import { COURSES } from '../courses'
-import { passed, readProgress } from '../progress'
+import { passed, readProgress, resumePoint } from '../progress'
 import type { Course } from '../course'
 import { Logo } from '../components/Logo'
 import { useReveal } from '../components/reveal'
@@ -15,7 +15,7 @@ function status(c: Course) {
   const complete = c.modules.filter((m) => passed(p, m.n)).length
   const next = live.find((m) => !passed(p, m.n))
   const started = complete > 0 || Object.keys(p.lessons).length > 0
-  return { complete, total: c.modules.length, next, started }
+  return { complete, total: c.modules.length, next, started, resume: resumePoint(c, p) }
 }
 
 export default function Home() {
@@ -30,6 +30,7 @@ export default function Home() {
       complete: all.reduce((n, x) => n + x.s.complete, 0),
       total: all.reduce((n, x) => n + x.s.total, 0),
       next: cur.s.next,
+      resume: cur.s.resume,
       started: all.some((x) => x.s.started),
     }
     return { lang: l, course: cur.c, s }
@@ -53,8 +54,8 @@ export default function Home() {
           <div className="btn-row">
             {courses.map(({ lang, course, s }, i) => course && s && (
               <a key={lang.id} className={'hub-btn' + (i === 0 ? ' primary' : '')}
-                 href={to(s.started && s.next ? `${course.base}/module-${s.next.n}` : course.base)}>
-                {s.started && s.next ? <>Continue <Plus text={lang.name} />: module {s.next.n}</> : <>Start <Plus text={lang.name} /></>}
+                 href={to(s.resume ? s.resume.href : s.started && s.next ? `${course.base}/module-${s.next.n}` : course.base)}>
+                {s.resume ? <>Resume <Plus text={lang.name} /></> : s.started && s.next ? <>Continue <Plus text={lang.name} />: module {s.next.n}</> : <>Start <Plus text={lang.name} /></>}
               </a>
             ))}
           </div>

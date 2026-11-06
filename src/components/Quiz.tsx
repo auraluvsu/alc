@@ -1,38 +1,44 @@
 import { useMemo, useState } from 'react'
-import { shuffleOptions } from './shuffle'
+import { randomSeed, seeded, shuffleOptions } from './shuffle'
 import type { Module } from '../content/types'
 import { Code, Options } from './Blocks'
 import { Inline } from './highlight'
-import { PASS_MARK } from '../progress'
+import { PASS_MARK, type QuizDraft } from '../progress'
 import { to } from '../router'
 import { useCourse } from '../course'
 
-export function Quiz({ mod, best, onFinish, next }: { mod: Module; best?: number; onFinish: (pct: number) => void; next?: number }) {
-  const [i, setI] = useState(0)
+export function Quiz({ mod, best, onFinish, next, draft, onDraft }: { mod: Module; best?: number; onFinish: (pct: number) => void; next?: number; draft?: QuizDraft; onDraft: (d: QuizDraft | null) => void }) {
+  // A saved draft is only usable if it still fits this quiz. If every question was answered,
+  // resume on the last one so the result is still recorded.
+  const usable = draft && draft.answers.length > 0 && draft.answers.length <= mod.quiz.length ? draft : undefined
+  const startAnswers = usable ? usable.answers.slice(0, Math.min(usable.answers.length, mod.quiz.length - 1)) : []
+  const [i, setI] = useState(startAnswers.length)
   const [picked, setPicked] = useState<number | null>(null)
   const [checked, setChecked] = useState(false)
-  const [answers, setAnswers] = useState<number[]>([])
+  const [answers, setAnswers] = useState<number[]>(startAnswers)
   const [done, setDone] = useState(false)
   const { base } = useCourse()
-  const [round, setRound] = useState(0)                 // bump to reshuffle on retake
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const qs = useMemo(() => mod.quiz.map((qq) => ({ ...qq, ...shuffleOptions(qq.options, qq.answer) })), [mod, round])
+  const [seed, setSeed] = useState(() => usable?.seed ?? randomSeed())   // new seed on retake reshuffles
+  const qs = useMemo(() => mod.quiz.map((qq, k) => ({ ...qq, ...shuffleOptions(qq.options, qq.answer, seeded(seed + k)) })), [mod, seed])
   const q = qs[i]
 
   const check = () => {
     if (picked === null) return
+    const next = [...answers, picked]
     setChecked(true)
-    setAnswers((a) => [...a, picked])
+    setAnswers(next)
+    if (next.length < qs.length) onDraft({ seed, i: next.length, answers: next })
   }
   const advance = () => {
     if (i + 1 < qs.length) { setI(i + 1); setPicked(null); setChecked(false) }
     else {
       const right = answers.filter((a, k) => a === qs[k].answer).length
+      onDraft(null)
       onFinish(Math.round((right / qs.length) * 100))
       setDone(true)
     }
   }
-  const restart = () => { setRound((r) => r + 1); setI(0); setPicked(null); setChecked(false); setAnswers([]); setDone(false) }
+  const restart = () => { onDraft(null); setSeed(randomSeed()); setI(0); setPicked(null); setChecked(false); setAnswers([]); setDone(false) }
 
   if (done) {
     const right = answers.filter((a, k) => a === qs[k].answer).length

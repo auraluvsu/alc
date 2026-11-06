@@ -9,7 +9,7 @@ import { Inline } from '../components/highlight'
 import { Quiz } from '../components/Quiz'
 import { Bridge, LangProvider, Plus } from '../components/Bridge'
 import { CourseCtx, useCourse, type Course } from '../course'
-import { passed, PASS_MARK, useProgress, type Progress } from '../progress'
+import { passed, PASS_MARK, resumePoint, useProgress, type Progress, type QuizDraft } from '../progress'
 import { Logo } from '../components/Logo'
 import { useReveal } from '../components/reveal'
 
@@ -46,7 +46,7 @@ function Shell({ sub }: { sub: string }) {
   const course = useCourse()
   const { base, modules: MODULES } = course
   const route = useMemo<Route>(() => { const r = parse(sub); return r.view === 'design' && course.design === false ? { view: 'home' } : r }, [sub, course.design])
-  const { p, markLesson, recordQuiz, reset } = useProgress(course.progressKey)
+  const { p, markLesson, recordQuiz, setLast, saveDraft, reset } = useProgress(course.progressKey)
   const theme = useTheme()
   const [menu, setMenu] = useState(false)
   useEffect(() => setMenu(false), [route])
@@ -99,8 +99,8 @@ function Shell({ sub }: { sub: string }) {
         {route.view === 'reference' && <Reference />}
         {route.view === 'standard' && <Standard />}
         {route.view === 'design' && course.design !== false && <DesignPage />}
-        {route.view === 'module' && <ModulePage n={route.n} l={route.l} p={p} markLesson={markLesson} />}
-        {route.view === 'quiz' && <QuizPage n={route.n} p={p} record={recordQuiz} />}
+        {route.view === 'module' && <ModulePage n={route.n} l={route.l} p={p} markLesson={markLesson} setLast={setLast} />}
+        {route.view === 'quiz' && <QuizPage n={route.n} p={p} record={recordQuiz} setLast={setLast} saveDraft={saveDraft} />}
       </main>
     </div>
   )
@@ -113,6 +113,7 @@ function Home({ p, reset }: { p: Progress; reset: () => void }) {
   const live = MODULES.filter(ready)
   const complete = MODULES.filter((m) => passed(p, m.n)).length
   const next = live.find((m) => !passed(p, m.n))
+  const resume = resumePoint(course, p)
   const lessonsTotal = live.reduce((a, m) => a + m.lessons.length, 0)
   const lessonsDone = live.reduce((a, m) => a + doneLessons(p, m), 0)
   useReveal(base)
@@ -123,7 +124,9 @@ function Home({ p, reset }: { p: Progress; reset: () => void }) {
         <h1>{hero.before}<span className="sheen-text"><Plus text={hero.accent} /></span>{hero.after}</h1>
         <p><Inline text={hero.text.replace('{pass}', String(PASS_MARK))} /></p>
         <div className="btn-row">
-          {next && <a className="btn primary" href={to(`${base}/module-${next.n}`)}>{complete === 0 && lessonsDone === 0 ? 'Start module 1' : `Continue: module ${next.n}`}</a>}
+          {resume
+            ? <a className="btn primary" href={to(resume.href)}>{resume.label}</a>
+            : next && <a className="btn primary" href={to(`${base}/module-${next.n}`)}>{complete === 0 && lessonsDone === 0 ? 'Start module 1' : `Continue: module ${next.n}`}</a>}
           <a className="btn" href={to(`${base}/reference`)}>Open the reference</a>
         </div>
         <div className="progress-bar" aria-label="Course progress"><span className="sheen-fill" style={{ width: `${(complete / MODULES.length) * 100}%` }} /></div>
@@ -144,7 +147,8 @@ function Home({ p, reset }: { p: Progress; reset: () => void }) {
               <div className="top">
                 <span className={'n ' + (ok ? 'sheen-text' : '')}>{String(m.n).padStart(2, '0')}</span>
                 {ok ? <span className="pill rose">Complete · {p.quiz[m.n]}%</span>
-                  : ready(m) ? <span className="pill">{doneLessons(p, m)}/{m.lessons.length} lessons</span>
+                  : p.draft?.[m.n] ? <span className="pill">Quiz in progress</span>
+                : ready(m) ? <span className="pill">{doneLessons(p, m)}/{m.lessons.length} lessons</span>
                   : <span className="pill">Next batch</span>}
               </div>
               <h3>{m.title}</h3>
@@ -158,12 +162,12 @@ function Home({ p, reset }: { p: Progress; reset: () => void }) {
   )
 }
 
-function ModulePage({ n, l, p, markLesson }: { n: number; l: number; p: Progress; markLesson: (id: string) => void }) {
+function ModulePage({ n, l, p, markLesson, setLast }: { n: number; l: number; p: Progress; markLesson: (id: string) => void; setLast: (pos: { n: number; l?: number }) => void }) {
   const course = useCourse()
   const { base } = course
   const m = course.modules.find((x) => x.n === n)
   const lesson = m?.lessons[l]
-  useEffect(() => { if (m && lesson) markLesson(`m${m.n}:l${l}`) }, [m, lesson, l, markLesson])
+  useEffect(() => { if (m && lesson) { markLesson(`m${m.n}:l${l}`); setLast({ n: m.n, l }) } }, [m, lesson, l, markLesson, setLast])
   if (!m) return <div className="col"><p>That module doesn't exist. <a href={to(base)}>Back to the overview</a>.</p></div>
   const prevOk = m.n === 1 || passed(p, m.n - 1)
 
@@ -200,7 +204,7 @@ function ModulePage({ n, l, p, markLesson }: { n: number; l: number; p: Progress
                 {p.lessons[`m${m.n}:l${i}`] && <span className="tick">✓</span>}{i + 1}. {ls.title}
               </a>
             ))}
-            <a href={to(`${base}/quiz-${m.n}`)} className="lesson-tab">Quiz{passed(p, m.n) ? ` · ${p.quiz[m.n]}%` : ''}</a>
+            <a href={to(`${base}/quiz-${m.n}`)} className="lesson-tab">Quiz{passed(p, m.n) ? ` · ${p.quiz[m.n]}%` : p.draft?.[m.n] ? ' · in progress' : ''}</a>
           </div>
           {lesson && (
             <article className="lesson" key={lesson.id}>
@@ -221,9 +225,10 @@ function ModulePage({ n, l, p, markLesson }: { n: number; l: number; p: Progress
   )
 }
 
-function QuizPage({ n, p, record }: { n: number; p: Progress; record: (n: number, pct: number) => void }) {
+function QuizPage({ n, p, record, setLast, saveDraft }: { n: number; p: Progress; record: (n: number, pct: number) => void; setLast: (pos: { n: number; quiz: true }) => void; saveDraft: (n: number, d: QuizDraft | null) => void }) {
   const { base, modules: MODULES } = useCourse()
   const m = MODULES.find((x) => x.n === n)
+  useEffect(() => { if (m?.quiz.length) setLast({ n, quiz: true }) }, [m, n, setLast])
   if (!m || !m.quiz.length) return <div className="col"><p>No quiz here yet. <a href={to(`${base}/module-${n}`)}>Back to the module</a>.</p></div>
   const next = MODULES.find((x) => x.n === n + 1)
   return (
@@ -233,7 +238,7 @@ function QuizPage({ n, p, record }: { n: number; p: Progress; record: (n: number
         <h1>{m.title}</h1>
         <p className="summary">{m.quiz.length} questions. Score {PASS_MARK}% or more to complete the module. Every answer comes with an explanation.</p>
       </header>
-      <Quiz key={n} mod={m} best={p.quiz[n]} onFinish={(pct) => record(n, pct)} next={next && ready(next) ? next.n : undefined} />
+      <Quiz key={n} mod={m} best={p.quiz[n]} onFinish={(pct) => record(n, pct)} draft={p.draft?.[n]} onDraft={(d) => saveDraft(n, d)} next={next && ready(next) ? next.n : undefined} />
     </div>
   )
 }
