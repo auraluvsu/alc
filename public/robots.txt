@@ -1,0 +1,6 @@
+# Aurora's Learning Centre: all public pages may be crawled.
+User-agent: *
+Allow: /
+
+# Production origin; must match the <loc> entries in sitemap.xml.
+Sitemap: https://alc-orcin.vercel.app/sitemap.xml
