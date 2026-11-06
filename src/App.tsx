@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import Home from './home/Home'
-import { SITE_NAME } from './site'
+import { pageTitle } from './pageTitle'
 import { navigate, to, useLinkInterception, usePath } from './router'
 import CourseShell from './tour/CourseShell'
 import { BY_SECTION } from './courses'
@@ -26,8 +26,8 @@ export default function App() {
   }, [section])
   useEffect(() => {
     document.documentElement.dataset.section = section || 'home'
-    document.title = course ? `${course.brand} · ${SITE_NAME}` : section === 'design' ? `Design · ${SITE_NAME}` : SITE_NAME
-  }, [section, course])
+    document.title = pageTitle(path)
+  }, [section, path])
 
   if (!known) return <NotFound path={path} />
   if (section === '') return <Home />

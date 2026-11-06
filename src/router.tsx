@@ -28,7 +28,12 @@ function pathToHash(path: string): string {
   return '#' + [section, rest.join('-')].filter(Boolean).join('-')
 }
 
+/** Set by the prerenderer (entry-server.tsx) so usePath works without `location`. */
+let ssrPath = '/'
+export const setSsrPath = (p: string) => { ssrPath = p }
+
 function readPath(): string {
+  if (typeof location === 'undefined') return ssrPath
   if (MODE === 'hash') return hashToPath(location.hash)
   return location.pathname.replace(/\/+$/, '') || '/'
 }

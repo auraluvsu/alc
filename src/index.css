@@ -760,7 +760,7 @@ a { color: var(--brand-deep); }
 .rise > :nth-child(6) { animation-delay: .38s; } .rise > :nth-child(n+7) { animation-delay: .46s; }
 
 /* Cards fade up as they scroll into view (see useReveal). "backwards" fill keeps hover transforms working afterwards. */
-.reveal:not([data-in]) { opacity: 0; }
+.js .reveal:not([data-in]) { opacity: 0; }   /* only hide once JS can reveal; prerendered HTML stays visible */
 .reveal[data-in] { animation: rise .7s cubic-bezier(.2,.7,.2,1) var(--d, 0ms) backwards; }
 
 @media (prefers-reduced-motion: reduce) {

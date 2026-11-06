@@ -8,6 +8,6 @@ export function useTheme() {
     else document.documentElement.removeAttribute('data-theme')
     try { if (t) localStorage.setItem('cpp-tour-theme', t); else localStorage.removeItem('cpp-tour-theme') } catch { /* ignore */ }
   }, [t])
-  const isDark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+  const isDark = t ? t === 'dark' : (typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches)
   return { isDark, toggle: () => setT(isDark ? 'light' : 'dark') }
 }
