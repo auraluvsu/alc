@@ -56,7 +56,13 @@ function Shell({ sub }: { sub: string }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <a href={to(base)} className="logo sheen-text" style={{ textDecoration: 'none' }}><Plus text={course.brand} /></a>
+        <div className="topbar-left">
+          <a href={to('/')} className="topbar-home" aria-label="Back to Aurora's Learning Centre">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <Logo size={24} />
+          </a>
+          <a href={to(base)} className="logo sheen-text" style={{ textDecoration: 'none' }}><Plus text={course.brand} /></a>
+        </div>
         <button className="btn" onClick={() => setMenu((x) => !x)} aria-expanded={menu}>{menu ? 'Close' : 'Modules'}</button>
       </header>
       <nav className={'rail' + (menu ? ' open' : '')}>

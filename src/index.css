@@ -772,3 +772,12 @@ a { color: var(--brand-deep); }
 .logo-mark.draw .lm-glow { opacity: 0; animation: lm-fade 1s ease-out .9s forwards; }
 @keyframes lm-fade { to { opacity: .16; } }
 @media (prefers-reduced-motion: reduce) { .logo-mark.draw .lm-glow { opacity: .16; } }
+
+/* Mobile course top bar: a way back to the site home that's always visible. */
+.topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.topbar-left .logo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.topbar-home { display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto; padding: 5px 7px 5px 4px; margin-left: -4px;
+  border-radius: 12px; border: 1px solid var(--line); color: var(--muted); text-decoration: none; min-height: 40px; }
+.topbar-home:hover, .topbar-home:active { color: var(--ink); border-color: var(--brand); }
+.topbar-home .logo-mark { box-shadow: none; }
+@media (max-width: 440px) { .topbar .logo { font-size: 20px; } }
