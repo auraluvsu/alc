@@ -1,0 +1,63 @@
+import type { LangId } from '../../course'
+
+// "Coming from another language" notes for the Python course.
+export const PY_BRIDGES: Record<number, Partial<Record<LangId, string>>> = {
+  1: {
+    ts: 'JS has a few hooks (`Symbol.iterator`, `toString`, `valueOf`); Python has a whole protocol of `__dunder__` methods covering `len`, indexing, `in`, operators, truthiness and `with`. Writing them is how your classes feel built-in.',
+    go: 'Go deliberately has no operator overloading or `len` hooks. Python is the opposite: almost every piece of syntax dispatches to a special method you can implement. Think of `Stringer` generalised to the whole language.',
+    java: 'Like implementing `Iterable`, `Comparable` and `toString()`, but for syntax itself: `__len__` makes `len(x)` work, and `__add__` makes `+` work. No interfaces need declaring; the method name is the contract.',
+    cpp: 'Special methods are Python\'s operator overloading, plus more (`__len__`, `__contains__`, `__bool__`, `__repr__`). There are no compile-time checks: a missing method shows up as a TypeError at runtime.',
+  },
+  2: {
+    ts: 'Comprehensions replace most `map`/`filter` chains, and slicing (`a[1:-1]`, `a[::-1]`) replaces `.slice()`. Tuples are real immutable sequences, not typed arrays. Watch out: `[[0]*3]*3` shares rows, just like `Array(3).fill([])`.',
+    go: 'A list slice `a[1:3]` is a **copy**, not a view like a Go slice. Lists grow like `append`, but never alias silently. Comprehensions replace most small `for` loops.',
+    java: 'Lists are like `ArrayList<Object>`, tuples like unmodifiable records without names. Comprehensions and generator expressions replace most stream pipelines, and generators are lazy like streams.',
+    cpp: 'A list is a vector of pointers to objects, not of values, so `array.array` or NumPy is the contiguous `std::vector<double>`. Slicing copies. Generator expressions are lazy like ranges views.',
+  },
+  3: {
+    ts: 'A dict is like a `Map` with literal syntax and ordered iteration, and any hashable value (including tuples) can be a key. Sets have real algebra (`|`, `&`, `-`, `^`). `frozendict` (3.15) is an immutable Map.',
+    go: 'A dict is a map with **insertion-ordered** iteration (Go deliberately randomises). There is no zero-value default: missing keys raise KeyError unless you use `get` or `defaultdict`. Keys must be hashable, much like comparable.',
+    java: 'dict ≈ `LinkedHashMap`, set ≈ `LinkedHashSet` without order. `__eq__`/`__hash__` follow the same contract as `equals`/`hashCode`. `Counter` and `defaultdict` save a lot of `getOrDefault` code.',
+    cpp: 'dict ≈ `unordered_map` but insertion-ordered. Hashability ≈ having a `std::hash` specialisation, and mutable types can\'t be keys. Lookup is O(1) average, with more memory overhead than a flat map.',
+  },
+  4: {
+    ts: 'Python `str` counts code points, so `len("😀") == 1` while JS gives 2. Bytes are a separate type (`bytes`, like `Uint8Array`), and you convert explicitly with `encode` and `decode`.',
+    go: 'Go strings are bytes; Python strings are code points, so `len("é")` is 1 in Python and 2 in Go. Python\'s `bytes` corresponds to Go\'s `[]byte`. Encode and decode explicitly at I/O boundaries.',
+    java: 'Java `String` is UTF-16, Python `str` is code points, so there are no surrogate pairs to worry about. `bytes` ≈ `byte[]`, and `encode`/`decode` ≈ `getBytes`/`new String(bytes, charset)`.',
+    cpp: '`std::string` is bytes with no Unicode awareness; Python separates `str` (text) from `bytes` (binary) and makes you convert. Since 3.15, file I/O defaults to UTF-8 everywhere.',
+  },
+  5: {
+    ts: '`@dataclass` gives you a class with generated constructor, equality and repr: closer to a TS class plus `===`-by-value. Type hints look like TS annotations but aren\'t checked when the program runs.',
+    go: 'A frozen dataclass is like a Go struct value with generated `String()` and `==`. Field tags in Go ≈ `field(...)` metadata. There are no exported/unexported rules, only a leading `_` by convention.',
+    java: '`@dataclass(frozen=True)` ≈ a `record`. `__post_init__` ≈ a compact canonical constructor. Hints are documentation plus static checking, not enforced types.',
+    cpp: 'Like an aggregate struct with defaulted `operator==` and `<=>`, generated for you. There is no compile-time type enforcement; hints are checked by external tools.',
+  },
+  6: {
+    ts: 'Same model as JS objects: variables hold references. The difference is that Python has **no** primitives; ints and strs are objects too, they are just immutable. Default argument values are evaluated once, unlike JS.',
+    go: 'Everything behaves like a pointer: `b = a` never copies. There are no value-type structs. Copy explicitly with `list(x)`, `x.copy()` or `copy.deepcopy`. Memory is managed by reference counting plus a cycle collector.',
+    java: 'Exactly Java\'s reference semantics, including for "primitives" (ints are immutable objects). `is` ≈ `==` on references, and `==` ≈ `.equals()`. CPython frees most objects immediately via reference counting.',
+    cpp: 'Every variable is like a `shared_ptr` to a heap object: assignment shares, it never copies. There is no RAII on destruction timing (use `with`). Deep copies are explicit (`copy.deepcopy`).',
+  },
+  7: { ts: 'Functions are objects with attributes; lambdas are expression-only and more limited than arrow functions.', go: 'Like Go func values, plus keyword arguments, defaults, *args and **kwargs.', java: 'No functional interfaces needed: any callable fits, and `__call__` makes objects callable.', cpp: 'Callables are uniform, like `std::function`, with no templates needed.' },
+  8: { ts: 'Very close to TypeScript\'s gradual typing, but checked by external tools (mypy, pyright), never at runtime.', go: 'Optional static types on top of a dynamic language; Protocols give Go-style structural interfaces for the checker.', java: 'Generics without erasure concerns at runtime, because there is no runtime typing at all.', cpp: 'Annotations resemble concepts for the type checker only; they have no effect on generated code.' },
+  9: { ts: 'Decorators are plain functions that wrap functions: simpler than TS experimental decorators.', go: 'Like middleware wrappers (`func(h Handler) Handler`) with dedicated syntax.', java: 'Like annotations that actually execute code at definition time.', cpp: 'Like higher-order functions returning lambdas; closures capture variables by reference.' },
+  10: { ts: 'First-class functions replace most class-based patterns, as in modern JS.', go: 'Strategy becomes a func value, just as idiomatic Go would do it.', java: 'Many GoF patterns collapse into a function or a dict of functions.', cpp: 'Strategy via callables instead of virtual interfaces.' },
+  11: { ts: 'There is no `private` keyword: `_name` is a convention and `__name` is name-mangled.', go: 'Underscore conventions instead of capitalisation, and nothing is enforced.', java: 'There are no access modifiers; properties replace getters and setters.', cpp: '`__slots__` gives a fixed, struct-like memory layout.' },
+  12: { ts: 'Make your own class feel like an Array: slicing, iteration, len.', go: 'Operator and protocol overloading that Go doesn\'t have.', java: 'Like implementing `List<E>` by hand, but with only the methods you need.', cpp: 'Like writing `operator[]`, `begin`/`end` and `size` for a container.' },
+  13: { ts: 'Protocols are TS-style structural interfaces for the type checker.', go: 'Protocols ≈ Go interfaces (implicit), and ABCs ≈ explicit registration.', java: 'ABCs ≈ abstract classes; Protocols add structural typing Java lacks.', cpp: 'ABCs ≈ abstract base classes; Protocols ≈ concepts for the checker.' },
+  14: { ts: 'Multiple inheritance is allowed, resolved with the C3 MRO; `super()` follows the MRO, not just the parent.', go: 'Go has no inheritance at all; Python has it fully, including multiple inheritance. Prefer composition.', java: 'Multiple inheritance of classes is allowed, unlike Java, through the MRO and mixins.', cpp: 'Like C++ multiple inheritance, but with a single, predictable MRO and cooperative `super()`.' },
+  15: { ts: 'Overloads, TypedDict ≈ object types, generics with variance: much like advanced TS.', go: 'Generics for the checker only; no runtime instantiation.', java: 'Variance annotations that Java expresses with wildcards.', cpp: 'Static-only generics with explicit variance.' },
+  16: { ts: 'Operator overloading that JS lacks.', go: 'Operator overloading that Go deliberately omits.', java: 'Operator overloading that Java lacks.', cpp: 'Like C++ operators, plus a reflected-operand protocol (`__radd__`) and NotImplemented.' },
+  17: { ts: 'Generators ≈ `function*`; `yield from` ≈ `yield*`.', go: 'Generators ≈ Go 1.23 iterators, but pull-based with real suspension.', java: 'Like Iterators and Streams, but written as plain functions with `yield`.', cpp: 'Generators ≈ `std::generator` coroutines.' },
+  18: { ts: '`with` ≈ `using` declarations (TS 5.2) / try-finally; `match` is far richer than `switch`.', go: '`with` ≈ `defer` attached to an object.', java: '`with` ≈ try-with-resources; `match` ≈ pattern-matching switch.', cpp: '`with` gives RAII-style scoped cleanup explicitly.' },
+  19: { ts: 'asyncio is like the event loop, while threads and processes give real parallelism, which JS only gets via workers.', go: 'No goroutines: threads (GIL or free-threaded), processes and asyncio each fit different jobs.', java: 'Threads exist, but the GIL limits CPU parallelism unless you use the free-threaded build or processes.', cpp: 'OS threads with a GIL, unless running free-threaded CPython.' },
+  20: { ts: 'Executors ≈ a worker pool with Promise-like futures.', go: 'Executors ≈ a goroutine pool plus a results channel.', java: '`concurrent.futures` ≈ `ExecutorService` + `Future`.', cpp: 'Executors ≈ a thread pool + `std::future`.' },
+  21: { ts: 'async/await looks the same; the event loop is explicit (asyncio).', go: 'Coloured functions: async code must be awaited, unlike goroutines.', java: 'Like CompletableFuture chains, written sequentially with await.', cpp: 'Like C++20 coroutines, with a standard event loop included.' },
+  22: { ts: 'Properties ≈ get/set accessors; `__getattr__` ≈ a Proxy `get` trap.', go: 'Dynamic attributes have no Go equivalent.', java: 'Properties replace getters and setters, with no boilerplate.', cpp: 'Like computed members via accessor functions, but transparent to callers.' },
+  23: { ts: 'Descriptors are the machinery behind properties, like defineProperty but reusable.', go: 'No equivalent: this is how ORMs define fields declaratively.', java: 'Similar to what annotation processors and proxies do in ORMs.', cpp: 'A runtime protocol for member access, unlike anything in C++.' },
+  24: { ts: 'Classes are objects created at runtime; metaclasses customise class creation.', go: 'Code generation at runtime instead of go:generate.', java: 'Closer to annotation processing plus reflection, but at runtime.', cpp: 'Runtime metaprogramming where C++ uses templates and (C++26) reflection.' },
+  25: { ts: 'Like typed arrays (Float64Array) with whole-array maths built in.', go: 'Like a []float64 with a shape attached and every loop written in C for you.', java: 'Like double[] with vectorised operations, as the Vector API attempts.', cpp: 'The closest thing to Eigen or std::mdspan; NumPy\'s core is C.' },
+  26: { ts: 'Replaces hand-written for-loops with whole-array calls, much like chaining typed-array helpers.', go: 'Each call is a pre-compiled loop, gonum-style but far broader.', java: 'Like streams over primitive arrays, but compiled and SIMD-friendly.', cpp: 'Ufuncs are precompiled C loops; BLAS/LAPACK do the linear algebra, as in Eigen.' },
+  27: { ts: 'Like TensorFlow.js tensors with automatic differentiation.', go: 'Gorgonia is the closest Go analogue; most Go shops call Python or ONNX.', java: 'DJL wraps PyTorch for Java.', cpp: 'LibTorch is this exact API in C++ (torch::Tensor, autograd included).' },
+  28: { ts: 'Train here, then run the exported ONNX model with onnxruntime-node/web.', go: 'Serve exported ONNX models from Go via onnxruntime bindings or gRPC.', java: 'Load exported models with ONNX Runtime Java or DJL.', cpp: 'Deploy with ONNX Runtime, AOTInductor or LibTorch: the usual quant production path.' },
+}
