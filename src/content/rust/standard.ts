@@ -278,4 +278,49 @@ let pos = line.find('=');                       // Option<usize>: a byte offset
 let s = "ab".repeat(3);                         // "ababab"`,
     when: 'Parsing and formatting text. Prefer methods that return borrowed slices (`split_once`) to ones that allocate.',
   },
+  // ---------------- Option & Result ----------------
+  {
+    name: 'Result combinators', header: 'core::result', cat: 'Option & Result', module: 6,
+    summary: 'map, map_err, and_then, or_else, unwrap_or*, ok, is_ok_and.',
+    what: '`map(f)` transforms `Ok`, `map_err(f)` transforms `Err`, `and_then(f)` chains a fallible step, `or_else(f)` recovers, `unwrap_or(d)`, `unwrap_or_else(f)` and `unwrap_or_default()` supply a fallback, `ok()` and `err()` convert to `Option`, and `is_ok_and(f)` tests the success value.',
+    code: `let n: Result<u32, String> = "7".parse::<u32>()
+    .map_err(|e| format!("bad number: {e}"))
+    .and_then(|n| if n < 100 { Ok(n) } else { Err("too big".into()) });
+let safe = n.clone().unwrap_or(0);
+let ok = n.is_ok_and(|v| v > 5);`,
+    when: 'Short pipelines where `?` would need an extra helper function. For longer logic, early returns with `?` read better.',
+  },
+  {
+    name: 'Iterator collect into Result / Option', header: 'core::iter', cat: 'Option & Result', module: 6,
+    summary: 'Turn many fallible steps into one outcome.',
+    what: '`collect::<Result<Vec<T>, E>>()` gathers `Ok` values and stops at the first `Err`. `collect::<Option<Vec<T>>>()` stops at the first `None`. `sum` and `product` also work over `Result` and `Option`. `partition(Result::is_ok)` splits successes from failures when you need both.',
+    code: `let ids: Result<Vec<u32>, _> = ["1", "2", "3"].iter().map(|s| s.parse::<u32>()).collect();
+let (good, bad): (Vec<_>, Vec<_>) = ["1", "x"].iter().map(|s| s.parse::<u32>()).partition(Result::is_ok);`,
+    when: 'Parsing a whole file or request. Either you have every row or you report the first failure.',
+  },
+  {
+    name: 'std::error::Error / Box<dyn Error>', header: 'std::error', cat: 'Errors', module: 6,
+    summary: 'The standard interface for error values.',
+    what: 'Implement `Error` (with `Debug + Display`) for your error types. `source()` returns the underlying cause. `Box<dyn Error + Send + Sync>` holds any error and is built by `?` or `.into()`. `downcast_ref::<T>()` recovers a concrete type.',
+    code: `use std::error::Error;
+fn describe(e: &dyn Error) -> String {
+    let mut s = e.to_string();
+    let mut cur = e.source();
+    while let Some(c) = cur { s.push_str(&format!(": {c}")); cur = c.source(); }
+    s
+}`,
+    when: 'Function signatures in applications and examples, and as the trait to implement for library error types.',
+  },
+  {
+    name: 'io::Result / io::Error', header: 'std::io', cat: 'I/O', module: 6,
+    summary: 'The standard result type for I/O, with error kinds.',
+    what: '`io::Result<T>` is `Result<T, io::Error>`. `e.kind()` returns an `ErrorKind` such as `NotFound`, `PermissionDenied` or `UnexpectedEof` that you can match on. `io::Error::other("msg")` builds a custom one.',
+    code: `use std::io::{self, ErrorKind};
+match std::fs::read_to_string("cfg.toml") {
+    Ok(t) => println!("{}", t.len()),
+    Err(e) if e.kind() == ErrorKind::NotFound => println!("using defaults"),
+    Err(e) => return Err(e),
+}`,
+    when: 'Any file, socket or pipe operation. Match on kinds for expected conditions such as "file not found".',
+  },
 ]

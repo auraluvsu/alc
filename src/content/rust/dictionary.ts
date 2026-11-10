@@ -233,4 +233,29 @@ m.entry(k).or_default().push(x);` },
   { term: 'get vs index', cat: 'Maps', module: 5, desc: '`m.get(&k)` returns an `Option`. `m[&k]` panics when the key is missing and never inserts.', syntax: `if let Some(v) = m.get("a") {}` },
   { term: 'Hasher', cat: 'Maps', module: 5, desc: 'The default hasher resists hash-flooding. For trusted keys, faster ones (FxHash, ahash) are common.', syntax: `use rustc_hash::FxHashMap;
 let m: FxHashMap<u64, f64> = FxHashMap::default();` },
+  // ---------- Errors ----------
+  { term: 'panic!', cat: 'Errors', module: 6, desc: 'Reports an unrecoverable bug and unwinds the stack (or aborts). The thread ends, and a panic in `main` exits with code 101.', syntax: `panic!("invariant broken: {x}");
+RUST_BACKTRACE=1 cargo run` },
+  { term: 'unwrap / expect', cat: 'Errors', module: 6, desc: 'Return the value or panic. `expect` takes a message that should say why failure is impossible.', syntax: `let n = s.parse::<i32>().expect("validated earlier");` },
+  { term: 'assert! / assert_eq! / debug_assert!', cat: 'Errors', module: 6, desc: 'Panic if a condition is false. `debug_assert!` is compiled out of release builds.', syntax: `assert_eq!(a, b, "mismatch for {id}");` },
+  { term: 'unreachable! / todo! / unimplemented!', cat: 'Errors', module: 6, desc: 'Panics that document intent: this cannot happen, this is not written yet, this is deliberately missing.', syntax: `_ => unreachable!("validated")
+todo!()` },
+  { term: 'Result<T, E>', cat: 'Errors', module: 6, desc: 'Success (`Ok(T)`) or failure (`Err(E)`). `#[must_use]`, so ignoring one warns.', syntax: `fn parse(s: &str) -> Result<u32, ParseIntError> { s.parse() }` },
+  { term: '? operator', cat: 'Errors', module: 6, desc: 'On `Err`, returns early with `Err(From::from(e))`. On `Ok`, unwraps. Also works on `Option`.', syntax: `let text = fs::read_to_string(p)?;
+let c = s.chars().next()?;` },
+  { term: 'map_err / ok_or', cat: 'Errors', module: 6, desc: '`map_err` converts the error of a `Result`. `ok_or` and `ok_or_else` turn `None` into an `Err`.', syntax: `s.parse::<u8>().map_err(MyError::Parse)?;
+opt.ok_or(MyError::Missing)?` },
+  { term: 'collect into Result', cat: 'Errors', module: 6, desc: 'Gathers an iterator of `Result<T, E>` into `Result<Vec<T>, E>`, stopping at the first `Err`.', syntax: `let v: Result<Vec<i32>, _> = it.map(|s| s.parse::<i32>()).collect();` },
+  { term: 'std::error::Error', cat: 'Errors', module: 6, desc: 'The standard error trait. Requires `Debug + Display`, and optionally provides `source()` for the cause. Available in `core` since 1.81.', since: 'Rust 1.81', syntax: `impl std::error::Error for MyError {}` },
+  { term: 'Box<dyn Error>', cat: 'Errors', module: 6, desc: 'A boxed trait object that can hold any error. `?` converts into it automatically.', syntax: `fn run() -> Result<(), Box<dyn std::error::Error>> { Ok(()) }` },
+  { term: 'From (for errors)', cat: 'Errors', module: 6, desc: 'Conversion trait used by `?`. Implement `From<SourceError> for MyError` so `?` converts for you.', syntax: `impl From<io::Error> for MyError {
+    fn from(e: io::Error) -> Self { MyError::Io(e) }
+}` },
+  { term: 'thiserror', cat: 'Errors', module: 6, desc: 'A derive macro for error enums: `#[error("...")]` writes `Display`, and `#[from]` writes `From` and `source`. For libraries.', syntax: `#[derive(Debug, thiserror::Error)]
+enum E { #[error("io: {0}")] Io(#[from] std::io::Error) }` },
+  { term: 'anyhow', cat: 'Errors', module: 6, desc: 'A single catch-all error type with context for applications: `anyhow::Result`, `.context()`, `bail!` and `ensure!`.', syntax: `let t = fs::read_to_string(p).with_context(|| format!("reading {p}"))?;
+bail!("bad line {n}");` },
+  { term: 'catch_unwind', cat: 'Errors', module: 6, desc: 'Catches a panic at a boundary (FFI, thread pools). Not a general exception mechanism.', syntax: `let r = std::panic::catch_unwind(|| risky());` },
+  { term: 'ExitCode / Termination', cat: 'Errors', module: 6, desc: '`main` may return `()`, `Result<(), E: Debug>` or `ExitCode`. An `Err` prints `Error: {e:?}` and exits with status 1.', syntax: `fn main() -> ExitCode { ExitCode::from(2) }` },
+  { term: 'is_ok_and / is_err_and', cat: 'Errors', module: 6, desc: 'Test the contents of a `Result` as a bool without unwrapping.', since: 'Rust 1.70', syntax: `res.is_ok_and(|n| n > 0)` },
 ]
