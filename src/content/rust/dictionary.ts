@@ -328,4 +328,47 @@ struct Args { #[arg(short, long)] verbose: bool, path: PathBuf }` },
   { term: 'stdout vs stderr', cat: 'Command line', module: 8, desc: '`println!` writes results to stdout and `eprintln!` writes diagnostics to stderr, so pipelines stay clean.', syntax: `eprintln!("error: {e}");` },
   { term: 'BufReader / BufWriter', cat: 'Command line', module: 8, desc: 'Wrap a reader or writer to batch system calls. Essential for line-by-line I/O.', syntax: `let out = BufWriter::new(io::stdout().lock());` },
   { term: 'Thin main', cat: 'Command line', module: 8, desc: 'A pattern: `main.rs` parses arguments and reports errors, and `lib.rs` holds the logic so it can be tested.', syntax: `fn main() { if let Err(e) = app::run() { eprintln!("{e}"); std::process::exit(1) } }` },
+  // ---------- Closures ----------
+  { term: 'Closure', cat: 'Closures', module: 9, desc: 'An anonymous function that captures variables from its environment. Each closure has its own unique type.', syntax: `let add = |a, b| a + b;
+let tax = 0.2; let f = |p: f64| p * (1.0 + tax);` },
+  { term: 'move closure', cat: 'Closures', module: 9, desc: 'Forces a closure to take ownership of the variables it uses. Required for threads and for returning closures.', syntax: `let s = String::new();
+thread::spawn(move || println!("{s}"));` },
+  { term: 'Fn / FnMut / FnOnce', cat: 'Closures', module: 9, desc: 'The closure traits: callable repeatedly by shared reference, repeatedly with mutation, or exactly once. `Fn` implies `FnMut`, which implies `FnOnce`.', syntax: `fn run<F: FnMut()>(mut f: F) { f(); f(); }` },
+  { term: 'impl Fn / Box<dyn Fn>', cat: 'Closures', module: 9, desc: '`impl Fn` returns or accepts one closure type statically. `Box<dyn Fn>` erases the type for heterogeneous or stored callbacks.', syntax: `fn adder(n: i32) -> impl Fn(i32) -> i32 { move |x| x + n }
+let cbs: Vec<Box<dyn Fn(i32) -> i32>> = vec![];` },
+  { term: 'Function pointer fn', cat: 'Closures', module: 9, desc: 'A pointer to a function. Non-capturing closures and named functions coerce to it. It implements all `Fn*` traits.', syntax: `let f: fn(i32) -> i32 = |x| x + 1;` },
+  { term: 'Async closure', cat: 'Closures', module: 9, desc: 'A closure that returns a future, and can borrow its captures across `.await`. Bounded with `AsyncFn`, `AsyncFnMut`, `AsyncFnOnce`.', since: 'Rust 1.85', syntax: `let f = async |x: u32| x + 1;` },
+  // ---------- Iterators ----------
+  { term: 'Iterator', cat: 'Iterators', module: 9, desc: 'A trait with `type Item` and `fn next(&mut self) -> Option<Item>`. All the adapters are provided methods.', syntax: `impl Iterator for Countdown {
+    type Item = u32;
+    fn next(&mut self) -> Option<u32> { /* ... */ }
+}` },
+  { term: 'iter / iter_mut / into_iter', cat: 'Iterators', module: 9, desc: 'Borrow items (`&T`), borrow mutably (`&mut T`), or take ownership (`T`).', syntax: `for x in &v {}
+for x in &mut v {}
+for x in v {}` },
+  { term: 'IntoIterator / FromIterator', cat: 'Iterators', module: 9, desc: '`IntoIterator` powers `for` loops. `FromIterator` powers `collect`. Implement them for your own collections.', syntax: `impl FromIterator<i32> for MyColl { /* ... */ }` },
+  { term: 'map / filter / filter_map', cat: 'Iterators', module: 9, desc: 'Transform items, keep items, or do both when the closure returns `Option`.', syntax: `it.map(|x| x * 2).filter(|x| *x > 3)
+it.filter_map(|s| s.parse().ok())` },
+  { term: 'enumerate / zip / chain', cat: 'Iterators', module: 9, desc: 'Attach indices, pair two iterators, or concatenate them.', syntax: `for (i, x) in v.iter().enumerate() {}
+a.iter().zip(b.iter())` },
+  { term: 'take / skip / step_by / rev', cat: 'Iterators', module: 9, desc: 'Limit, skip, stride and reverse an iterator.', syntax: `(0..100).step_by(10).take(3)
+v.iter().rev()` },
+  { term: 'flat_map / flatten', cat: 'Iterators', module: 9, desc: 'Map each item to an iterator and join them, or flatten nested iterables (including `Option`).', syntax: `words.iter().flat_map(|w| w.chars())` },
+  { term: 'peekable / scan / take_while', cat: 'Iterators', module: 9, desc: '`peekable` looks ahead, `scan` threads state (running totals), `take_while` stops at the first failure.', syntax: `let mut it = s.chars().peekable();
+while let Some(c) = it.next_if(|c| c.is_ascii_digit()) {}` },
+  { term: 'collect', cat: 'Iterators', module: 9, desc: 'Builds a collection from an iterator: `Vec`, `String`, `HashMap`, `Result<Vec<_>, _>` and more.', syntax: `let v: Vec<_> = it.collect();
+let m: HashMap<_, _> = pairs.into_iter().collect();` },
+  { term: 'sum / product / count / min / max', cat: 'Iterators', module: 9, desc: 'Reduce an iterator to one value. `sum` and `product` need a result type.', syntax: `let s: f64 = xs.iter().sum();
+let m = v.iter().max_by_key(|t| t.px);` },
+  { term: 'fold / reduce / try_fold', cat: 'Iterators', module: 9, desc: 'General reductions. `fold` takes an initial value, `reduce` uses the first item, `try_fold` can stop early with an error.', syntax: `let t = v.iter().fold(0, |a, x| a + x);` },
+  { term: 'find / position / any / all', cat: 'Iterators', module: 9, desc: 'Short-circuiting searches and tests.', syntax: `v.iter().find(|x| **x > 3)
+v.iter().position(|x| *x == 3)
+v.iter().any(|x| *x > 0)` },
+  { term: 'partition / unzip', cat: 'Iterators', module: 9, desc: 'Split an iterator into two collections by a predicate, or split pairs.', syntax: `let (even, odd): (Vec<_>, Vec<_>) = v.into_iter().partition(|x| x % 2 == 0);` },
+  { term: 'windows / chunks / chunk_by', cat: 'Iterators', module: 9, desc: 'Slice methods that yield overlapping windows, disjoint chunks, or runs of consecutive equal items.', syntax: `v.windows(2).map(|w| w[1] - w[0])
+v.chunks(4)
+v.chunk_by(|a, b| a == b)` },
+  { term: 'repeat_n / from_fn / successors', cat: 'Iterators', module: 9, desc: 'Create iterators from nothing: `repeat_n(x, n)`, `from_fn(|| ...)`, `successors(first, |prev| next)`.', syntax: `let it = std::iter::successors(Some(1), |&x| (x < 100).then_some(x * 2));` },
+  { term: 'Lazy evaluation', cat: 'Iterators', module: 9, desc: 'Adapters do nothing until a consumer pulls items. This enables early exit and streaming.', syntax: `let first = huge.iter().map(f).find(p);   // stops at the first match` },
+  { term: 'Zero-cost abstraction', cat: 'Iterators', module: 9, desc: 'High-level code (iterator chains, generics) compiles to the same machine code as a hand-written loop.', syntax: `v.iter().filter(p).map(f).sum::<i32>()` },
 ]

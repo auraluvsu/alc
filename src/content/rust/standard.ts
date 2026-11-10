@@ -431,4 +431,59 @@ io::stdin().read_line(&mut name)?;
 let name = name.trim();`,
     when: 'Interactive tools and pipelines. Wrap in `BufWriter` for large output.',
   },
+  // ---------------- Iterators ----------------
+  {
+    name: 'Iterator adapters: map / filter / enumerate / zip / take / skip', header: 'core::iter', cat: 'Iterators', module: 9,
+    summary: 'Lazy transformations that return another iterator.',
+    what: '`map(f)` transforms, `filter(p)` keeps, `filter_map(f)` does both with `Option`, `enumerate()` adds an index, `zip(other)` pairs items, `take(n)` / `skip(n)` / `step_by(n)` slice by position, `chain(other)` concatenates, `rev()` reverses double-ended iterators, `flat_map` and `flatten` unnest, `peekable()` allows `peek()`. They run only when consumed.',
+    code: `let names = ["a", "b", "c"]; let px = [1.0, 2.5, 3.0];
+let rows: Vec<String> = names.iter().zip(px.iter()).enumerate()
+    .filter(|(_, (_, p))| **p > 1.5)
+    .map(|(i, (n, p))| format!("{i}:{n}={p}"))
+    .collect();`,
+    when: 'Any data processing over a sequence. Chain them instead of writing index loops with temporary Vecs.',
+  },
+  {
+    name: 'Iterator consumers: collect / sum / count / fold / min / max', header: 'core::iter', cat: 'Iterators', module: 9,
+    summary: 'Run the pipeline and produce one result.',
+    what: '`collect` builds a collection (type needed). `sum` / `product` need a numeric type. `count` is the number of items, `min` / `max` / `min_by_key` / `max_by` / `min_by` pick extremes, `fold(init, f)` accumulates, `reduce(f)` uses the first item, `last`, `nth`, `for_each` and `try_for_each` exist as well.',
+    code: `let v = [3, 1, 4, 1, 5];
+let total: i32 = v.iter().sum();
+let m = v.iter().copied().max();                     // Some(5)
+let longest = ["a", "bcd", "ef"].iter().max_by_key(|s| s.len());
+let fmax = [1.5, 0.2].iter().copied().max_by(|a, b| a.total_cmp(b));
+let csv = v.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(",");`,
+    when: 'The last step of any pipeline. Annotate the type for `collect`, `sum` and `product`.',
+  },
+  {
+    name: 'Iterator::find / position / any / all', header: 'core::iter', cat: 'Iterators', module: 9,
+    summary: 'Search and test, stopping at the first answer.',
+    what: '`find(p)` returns the first matching item as `Option`. `position(p)` returns its index. `any(p)` and `all(p)` return a `bool` and short-circuit. `find_map(f)` returns the first `Some` the closure produces.',
+    code: `let first_big = v.iter().find(|x| **x > 3);          // Option<&i32>
+let idx = v.iter().position(|&x| x == 4);             // Option<usize>
+let ok = v.iter().all(|x| *x > 0);
+let n = words.iter().find_map(|w| w.parse::<i32>().ok());`,
+    when: 'Lookups in a Vec you do not want to index, and validation checks. For many lookups, build a `HashMap`.',
+  },
+  {
+    name: 'iter::repeat_n / from_fn / successors / once', header: 'core::iter', cat: 'Iterators', module: 9,
+    summary: 'Build iterators from nothing.',
+    what: '`repeat_n(x, n)` yields a clone `n` times. `from_fn(f)` calls a closure returning `Option` until `None`. `successors(first, f)` iterates a recurrence. `once(x)` yields one item, `empty()` none. `std::array::from_fn(|i| ...)` builds a fixed array.',
+    code: `use std::iter;
+let pow2: Vec<u32> = iter::successors(Some(1u32), |&x| x.checked_mul(2)).take(5).collect();   // 1,2,4,8,16
+let grid: [[u8; 3]; 2] = std::array::from_fn(|r| std::array::from_fn(|c| (r * 3 + c) as u8));
+let pad: String = iter::repeat_n('-', 10).collect();`,
+    when: 'Generators for tests, geometric sequences, tokenisers, and padding.',
+  },
+  // ---------------- Closures ----------------
+  {
+    name: 'Closure-taking methods: sort_by_key / retain / map_or / unwrap_or_else', header: 'core', cat: 'Closures', module: 9,
+    summary: 'Where closures commonly appear in the standard library.',
+    what: '`sort_by_key(|x| key)` and `sort_by(|a, b| ...)` sort with a closure. `retain(|x| keep)` filters in place. `Option::map_or(default, f)` and `map_or_else`, `unwrap_or_else(|| ...)`, `or_else` compute lazily. `entry().or_insert_with(|| ...)` builds a value only when missing. `thread::spawn(move || ...)` takes `FnOnce`.',
+    code: `v.sort_by_key(|t| std::cmp::Reverse(t.qty));
+let label = opt.map_or("none".to_string(), |x| format!("#{x}"));
+let cfg = map.entry(key).or_insert_with(|| Config::load());
+let n = opt.unwrap_or_else(|| expensive_default());`,
+    when: 'Use the lazy forms (`_else`, `_with`) whenever the default is costly to compute or allocates.',
+  },
 ]
