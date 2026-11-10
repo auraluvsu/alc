@@ -169,4 +169,113 @@ fn main() -> ExitCode {
 let big = (n > 100).then(|| expensive(n));         // lazily computed`,
     when: 'Smart constructors, validations and optional fields: it replaces `if cond { Some(x) } else { None }`.',
   },
+  // ---------------- Containers ----------------
+  {
+    name: 'Vec::push / pop / insert / remove', header: 'std::vec', cat: 'Containers', module: 5,
+    summary: 'Add and remove elements of a Vec.',
+    what: '`push` and `pop` work at the end in amortised O(1). `insert(i, x)` and `remove(i)` shift later elements (O(n)). `swap_remove(i)` is O(1) but moves the last element into the gap. `truncate(n)` and `clear()` drop elements, and `extend` appends many.',
+    code: `let mut v = vec![1, 2, 3];
+v.push(4);
+let last = v.pop();            // Some(4)
+v.insert(0, 9);                // [9, 1, 2, 3]
+let gone = v.swap_remove(0);   // 9, v = [3, 1, 2]
+v.extend([7, 8]);`,
+    when: 'Building and editing sequences. When removal order does not matter, prefer `swap_remove`. If you remove from the front often, use a `VecDeque`.',
+  },
+  {
+    name: 'Vec::retain / drain / dedup / extract_if', header: 'std::vec', cat: 'Containers', module: 5,
+    summary: 'Filter a Vec in place.',
+    what: '`retain(pred)` keeps matching elements. `drain(range)` removes a range and yields its elements. `dedup` removes consecutive equal elements, `dedup_by_key` by a key. `extract_if(range, pred)` yields (and removes) matching elements.',
+    code: `let mut v = vec![1, 1, 2, 3, 3, 4];
+v.dedup();                                       // [1, 2, 3, 4]
+v.retain(|x| x % 2 == 0);                        // [2, 4]
+let head: Vec<_> = v.drain(..1).collect();       // head = [2], v = [4]`,
+    when: 'Cleaning data, expiring old orders, processing and removing done items. `retain` is the replacement for the C++ erase-remove idiom.',
+  },
+  {
+    name: 'slice::sort / sort_by / sort_unstable', header: 'core::slice', cat: 'Containers', module: 5,
+    summary: 'Sort a slice in place.',
+    what: '`sort` is stable and requires `Ord`. `sort_unstable` is faster and may reorder equal elements. `sort_by(cmp)` takes a comparator, `sort_by_key(f)` a key function, and `sort_by_cached_key` computes each key once. `f64` is not `Ord`, so use `sort_by(f64::total_cmp)` or `sort_by(|a, b| a.partial_cmp(b).unwrap())`.',
+    code: `let mut v = vec![("b", 2.5), ("a", 2.5), ("c", 1.0)];
+v.sort_by(|x, y| x.1.total_cmp(&y.1).then(x.0.cmp(y.0)));
+let mut ids = vec![3, 1, 2];  ids.sort_unstable();`,
+    when: 'Always. Use `binary_search` and `partition_point` afterwards for fast lookup in the sorted slice.',
+  },
+  {
+    name: 'slice::binary_search / partition_point', header: 'core::slice', cat: 'Containers', module: 5,
+    summary: 'Find a position in a sorted slice in O(log n).',
+    what: '`binary_search(&x)` returns `Ok(index)` if found, otherwise `Err(insertion_point)`. `partition_point(pred)` returns the first index where the predicate turns false, which is often what you really want.',
+    code: `let v = [10, 20, 30, 40];
+assert_eq!(v.binary_search(&30), Ok(2));
+assert_eq!(v.binary_search(&25), Err(2));
+let first_ge_25 = v.partition_point(|&x| x < 25);   // 2`,
+    when: 'Time-series lookups, sorted price ladders, and insertion in sorted order: `v.insert(v.partition_point(|&x| x < n), n)`.',
+  },
+  {
+    name: 'VecDeque / BinaryHeap', header: 'std::collections', cat: 'Containers', module: 5,
+    summary: 'A queue with O(1) at both ends, and a priority queue.',
+    what: '`VecDeque` has `push_back`, `push_front`, `pop_front`, `pop_back`, indexing and iteration. `BinaryHeap` has `push`, `pop` (the largest), `peek`, and `into_sorted_vec`. Use `Reverse` for a min-heap.',
+    code: `let mut q = VecDeque::from([1, 2, 3]);
+q.push_front(0);
+let a = q.pop_back();                 // Some(3)
+
+let mut h = BinaryHeap::new();
+h.push((2, "b")); h.push((9, "z"));
+let top = h.pop();                    // Some((9, "z"))`,
+    when: 'BFS, schedulers, rolling windows (queue), and top-k or event-time ordering (heap).',
+  },
+  // ---------------- Maps ----------------
+  {
+    name: 'HashMap::entry', header: 'std::collections::hash_map', cat: 'Maps', module: 5,
+    summary: 'Insert-or-update with a single lookup.',
+    what: '`entry(key)` returns an `Entry`. `.or_insert(v)`, `.or_insert_with(f)` and `.or_default()` insert if absent and return `&mut V`. `.and_modify(f)` runs only if present, and chains before `or_insert`.',
+    code: `let mut qty: HashMap<String, i64> = HashMap::new();
+for (sym, q) in fills {
+    *qty.entry(sym).or_default() += q;
+}
+qty.entry("XAU".into()).and_modify(|v| *v *= 2).or_insert(1);`,
+    when: 'Counting, grouping, caching and accumulating by key. It replaces "if contains then get else insert" in every language.',
+  },
+  {
+    name: 'HashMap::get / get_mut / remove / contains_key', header: 'std::collections', cat: 'Maps', module: 5,
+    summary: 'Look up, modify and delete by key.',
+    what: '`get(&k)` gives `Option<&V>` and `get_mut` gives `Option<&mut V>`. Keys can be queried by a borrowed form (`&str` for `String` keys). `remove(&k)` returns the old value. `m[&k]` panics if the key is missing.',
+    code: `let mut m: HashMap<String, f64> = HashMap::new();
+m.insert("a".into(), 1.0);
+if let Some(v) = m.get_mut("a") { *v += 1.0; }
+let old = m.remove("a");                  // Some(2.0)`,
+    when: 'Any keyed lookup. Prefer `get` to indexing when the key may be missing.',
+  },
+  {
+    name: 'BTreeMap::range / first_key_value / pop_first', header: 'std::collections', cat: 'Maps', module: 5, since: 'Rust 1.66',
+    summary: 'Ordered map operations: nearest key, range scan, pop smallest.',
+    what: '`range(a..b)` iterates keys in order within bounds, in either direction (`.rev()`). `first_key_value` and `last_key_value` peek at the ends, and `pop_first` and `pop_last` remove them.',
+    code: `let mut m = BTreeMap::new();
+m.insert(10, "a"); m.insert(20, "b"); m.insert(30, "c");
+let below = m.range(..25).next_back();     // Some((&20, &"b")): the greatest key < 25
+let low = m.pop_first();                   // Some((10, "a"))`,
+    when: 'Order books, time-indexed data ("latest value at or before t"), interval lookups and priority queues with updates.',
+  },
+  {
+    name: 'HashSet operations', header: 'std::collections', cat: 'Maps', module: 5,
+    summary: 'Uniqueness, membership and set algebra.',
+    what: '`insert` returns `true` if the value is new. `contains`, `remove`, and the lazy iterators `union`, `intersection`, `difference` and `symmetric_difference`. `BTreeSet` gives the same with sorted iteration.',
+    code: `let a: HashSet<i32> = [1, 2, 3].into();
+let b: HashSet<i32> = [2, 3, 4].into();
+let common: HashSet<_> = a.intersection(&b).copied().collect();
+let fresh = seen.insert(id);          // false if already present`,
+    when: 'De-duplication, "have I seen this?", and comparing two groups of ids.',
+  },
+  // ---------------- Strings ----------------
+  {
+    name: 'String / &str methods', header: 'alloc::string, core::str', cat: 'Text', module: 5,
+    summary: 'The everyday toolkit: push_str, split, trim, replace, contains, find.',
+    what: '`push_str`, `push`, `insert`, `clear` modify a `String`. `split`, `split_once`, `splitn`, `lines`, `split_whitespace` return borrowed pieces. `trim`, `strip_prefix`, `strip_suffix`, `starts_with`, `contains`, `find`, `replace`, `to_uppercase`, `repeat` and `parse` work on any `&str`.',
+    code: `let line = "key=value";
+if let Some((k, v)) = line.split_once('=') { println!("{k} -> {v}"); }
+let path = "/a/b".strip_prefix('/').unwrap_or("/a/b");
+let pos = line.find('=');                       // Option<usize>: a byte offset
+let s = "ab".repeat(3);                         // "ababab"`,
+    when: 'Parsing and formatting text. Prefer methods that return borrowed slices (`split_once`) to ones that allocate.',
+  },
 ]

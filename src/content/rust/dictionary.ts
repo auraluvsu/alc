@@ -187,4 +187,50 @@ cargo test --doc` },
   { term: 'rust-version (MSRV)', cat: 'Cargo', module: 4, desc: 'The minimum Rust version a crate promises to support. In the 2024 edition the resolver takes it into account.', since: 'Rust 1.84', syntax: `rust-version = "1.85"` },
   { term: 'Edition migration', cat: 'Cargo', module: 4, desc: '`cargo fix --edition` rewrites code to compile under the next edition, after which you bump the edition in `Cargo.toml`.', since: 'Rust 2024', syntax: `cargo fix --edition
 # then: edition = "2024"` },
+  // ---------- Collections ----------
+  { term: 'Vec<T>', cat: 'Collections', module: 5, desc: 'A growable, contiguous, heap-allocated array. Length is the element count and capacity is the allocated room.', syntax: `let mut v = vec![1, 2, 3];
+v.push(4);
+let x = v.get(10);     // None` },
+  { term: 'vec!', cat: 'Collections', module: 5, desc: 'Macro that builds a `Vec` from a list or a repeated value.', syntax: `let a = vec![1, 2, 3];
+let z = vec![0u8; 1024];` },
+  { term: 'with_capacity / reserve', cat: 'Collections', module: 5, desc: 'Pre-allocate room so later pushes do not reallocate.', syntax: `let mut v = Vec::with_capacity(n);
+v.reserve(100);` },
+  { term: 'retain / drain / dedup', cat: 'Collections', module: 5, desc: '`retain` keeps matching elements, `drain(range)` removes and yields a range, `dedup` removes adjacent duplicates.', syntax: `v.retain(|x| *x > 0);
+let gone: Vec<_> = v.drain(..2).collect();
+v.sort(); v.dedup();` },
+  { term: 'extract_if', cat: 'Collections', module: 5, desc: 'Removes the elements matching a predicate and yields them lazily.', since: 'Rust 1.87', syntax: `let evens: Vec<_> = v.extract_if(.., |x| *x % 2 == 0).collect();` },
+  { term: 'sort / sort_by / sort_by_key', cat: 'Collections', module: 5, desc: '`sort` is stable and needs `Ord`. `sort_unstable` is usually faster. Floats need `sort_by(f64::total_cmp)`.', syntax: `v.sort();
+v.sort_by_key(|t| t.px_ticks);
+fs.sort_by(f64::total_cmp);` },
+  { term: 'VecDeque', cat: 'Collections', module: 5, desc: 'A growable ring buffer with O(1) push and pop at both ends.', syntax: `let mut q = VecDeque::new();
+q.push_back(1); q.pop_front();` },
+  { term: 'BinaryHeap', cat: 'Collections', module: 5, desc: 'A max-heap priority queue. Wrap items in `Reverse` for a min-heap.', syntax: `heap.push(3);
+heap.pop();       // Some(3)` },
+  { term: 'HashSet / BTreeSet', cat: 'Collections', module: 5, desc: 'Sets of unique values: hashed (unordered) or sorted. Support union, intersection and difference.', syntax: `let fresh = seen.insert(x);   // bool
+a.intersection(&b)` },
+  { term: 'BTreeMap', cat: 'Collections', module: 5, desc: 'A sorted map with range queries and ordered iteration. O(log n).', syntax: `m.range(10..20);
+m.first_key_value();
+m.pop_first();` },
+  // ---------- Strings ----------
+  { term: 'String', cat: 'Strings', module: 5, desc: 'An owned, growable, UTF-8 string. Internally a `Vec<u8>` that is always valid UTF-8.', syntax: `let mut s = String::from("hi");
+s.push_str(" there");` },
+  { term: 'str::chars / bytes / char_indices', cat: 'Strings', module: 5, desc: 'Iterate a string as Unicode scalar values, raw bytes, or `(byte offset, char)` pairs.', syntax: `for c in s.chars() {}
+for (i, c) in s.char_indices() {}` },
+  { term: 'to_string / to_owned / into', cat: 'Strings', module: 5, desc: 'Ways to make a `String` from a `&str`. They all allocate and copy.', syntax: `let a = "x".to_string();
+let b: String = "x".into();` },
+  { term: 'format!', cat: 'Strings', module: 5, desc: 'Builds a `String` without taking ownership of its arguments.', syntax: `let s = format!("{a}-{}", b);` },
+  { term: 'split / trim / lines / parse', cat: 'Strings', module: 5, desc: 'Common text operations. `split` returns an iterator of borrowed slices.', syntax: `let v: Vec<&str> = s.split(',').collect();
+let n: i32 = s.trim().parse()?;` },
+  { term: 'Grapheme cluster', cat: 'Strings', module: 5, desc: 'What a reader perceives as one character, which may span several scalar values. The `unicode-segmentation` crate iterates them.', syntax: `// "e\u{301}" is two chars, one grapheme` },
+  { term: 'OsString / Path', cat: 'Strings', module: 5, desc: 'File-system strings that may not be valid UTF-8, with `PathBuf` as the owned path type.', syntax: `let p = Path::new("a/b.txt");
+p.extension()` },
+  // ---------- Maps ----------
+  { term: 'HashMap<K, V>', cat: 'Maps', module: 5, desc: 'An unordered hash map, O(1) average. Keys must implement `Eq` and `Hash`.', syntax: `let mut m = HashMap::new();
+m.insert("a", 1);
+m.get("a");` },
+  { term: 'Entry API', cat: 'Maps', module: 5, desc: '`entry(k)` finds a slot once. `or_insert`, `or_insert_with`, `or_default` and `and_modify` insert or update in one lookup.', syntax: `*m.entry(k).or_insert(0) += 1;
+m.entry(k).or_default().push(x);` },
+  { term: 'get vs index', cat: 'Maps', module: 5, desc: '`m.get(&k)` returns an `Option`. `m[&k]` panics when the key is missing and never inserts.', syntax: `if let Some(v) = m.get("a") {}` },
+  { term: 'Hasher', cat: 'Maps', module: 5, desc: 'The default hasher resists hash-flooding. For trusted keys, faster ones (FxHash, ahash) are common.', syntax: `use rustc_hash::FxHashMap;
+let m: FxHashMap<u64, f64> = FxHashMap::default();` },
 ]
