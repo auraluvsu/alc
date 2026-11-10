@@ -540,4 +540,69 @@ let cfg: &'static Config = Box::leak(Box::new(Config::load()));
 let name: Box<str> = "alc".into();`,
     when: 'Plugins, recursive data and one-time globals. Prefer `enum` for a closed set of types.',
   },
+  // ---------------- Concurrency ----------------
+  {
+    name: 'thread::spawn / scope / sleep', header: 'std::thread', cat: 'Concurrency', module: 11,
+    summary: 'Start threads, borrow locals safely, and wait.',
+    what: '`spawn(f)` starts a thread (`f: FnOnce + Send + \'static`) and returns a `JoinHandle`. `scope(|s| { s.spawn(...); })` runs threads that may borrow locals and joins them all before returning. `thread::Builder` sets name and stack size. `sleep`, `yield_now`, `current().id()` and `available_parallelism()` round out the API.',
+    code: `use std::thread;
+let data = vec![1u64, 2, 3, 4];
+let total: u64 = thread::scope(|s| {
+    let (a, b) = data.split_at(2);
+    let h1 = s.spawn(|| a.iter().sum::<u64>());
+    let h2 = s.spawn(|| b.iter().sum::<u64>());
+    h1.join().unwrap() + h2.join().unwrap()
+});`,
+    when: 'CPU-bound work divided over a few threads. For many parallel iterator operations use Rayon, and for huge numbers of I/O waits use async.',
+  },
+  {
+    name: 'mpsc::channel', header: 'std::sync::mpsc', cat: 'Concurrency', module: 11,
+    summary: 'Send owned messages between threads.',
+    what: '`channel()` returns `(Sender<T>, Receiver<T>)` (unbounded) and `sync_channel(n)` a bounded one. `Sender` is `Clone`. `send` returns `Err` if the receiver is gone. `recv` blocks, `try_recv` does not, `recv_timeout` waits up to a duration, and `rx.iter()` / `for m in rx` run until all senders are dropped.',
+    code: `use std::sync::mpsc;
+let (tx, rx) = mpsc::channel::<(u32, f64)>();
+for id in 0..3 {
+    let tx = tx.clone();
+    std::thread::spawn(move || tx.send((id, id as f64 * 1.5)).unwrap());
+}
+drop(tx);
+let mut out: Vec<_> = rx.iter().collect();`,
+    when: 'Pipelines, worker results and event streams. For MPMC or `select!`, use `crossbeam-channel` or `flume`.',
+  },
+  {
+    name: 'Mutex / RwLock', header: 'std::sync', cat: 'Concurrency', module: 11,
+    summary: 'Guard shared data with a lock that owns it.',
+    what: '`Mutex::new(v)`, `.lock()` (blocking), `.try_lock()`, `.into_inner()`, `.get_mut()` (no lock needed with `&mut`). `RwLock` has `.read()` and `.write()`. Guards deref to the data and unlock on drop. Both are `const`-constructible, so `static M: Mutex<T> = Mutex::new(..)` works. Poisoned locks return `Err` from `lock()`.',
+    code: `use std::sync::{Arc, Mutex};
+let book = Arc::new(Mutex::new(Vec::<u64>::new()));
+{
+    let mut g = book.lock().unwrap();
+    g.push(99);
+}                                   // guard dropped: unlocked
+let n = book.lock().unwrap().len(); // temporary guard: unlocked at the semicolon`,
+    when: 'State that several threads read and write. Keep critical sections tiny, and avoid holding a std mutex across `.await`.',
+  },
+  {
+    name: 'Atomic types', header: 'std::sync::atomic', cat: 'Concurrency', module: 11,
+    summary: 'Lock-free operations on single values.',
+    what: '`AtomicBool`, `AtomicU32`, `AtomicU64`, `AtomicUsize`, `AtomicI*` and `AtomicPtr` provide `load`, `store`, `swap`, `fetch_add`, `fetch_sub`, `fetch_and`, `fetch_or`, `fetch_max`, `compare_exchange` and `fetch_update`, each taking an `Ordering`.',
+    code: `use std::sync::atomic::{AtomicU64, AtomicBool, Ordering::*};
+static SEQ: AtomicU64 = AtomicU64::new(0);
+fn next_id() -> u64 { SEQ.fetch_add(1, Relaxed) }
+static STOP: AtomicBool = AtomicBool::new(false);
+fn should_stop() -> bool { STOP.load(Acquire) }`,
+    when: 'Counters, sequence numbers, stop flags and statistics. Anything wider than one word wants a lock.',
+  },
+  {
+    name: 'Condvar / Barrier', header: 'std::sync', cat: 'Concurrency', module: 11,
+    summary: 'Wait for a condition, or for all threads to arrive.',
+    what: '`Condvar::wait(guard)` or `wait_while(guard, pred)` releases the mutex and sleeps until `notify_one` / `notify_all`. Always re-check the condition in a loop (or use `wait_while`) because of spurious wake-ups. `Barrier::new(n).wait()` blocks until `n` threads arrive.',
+    code: `use std::sync::{Arc, Condvar, Mutex};
+let pair = Arc::new((Mutex::new(false), Condvar::new()));
+let p2 = Arc::clone(&pair);
+std::thread::spawn(move || { *p2.0.lock().unwrap() = true; p2.1.notify_one(); });
+let (m, cv) = &*pair;
+let _ready = cv.wait_while(m.lock().unwrap(), |ready| !*ready).unwrap();`,
+    when: 'Hand-written blocking queues and start-up synchronisation. In most programs a channel is simpler.',
+  },
 ]

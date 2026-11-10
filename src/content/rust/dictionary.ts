@@ -400,4 +400,32 @@ CFG.set("x".into()).ok();` },
   { term: 'Cow<\'a, B>', cat: 'Smart pointers', module: 10, desc: 'Clone-on-write: either a borrowed value or an owned one, allocating only when modification is needed.', syntax: `fn clean(s: &str) -> Cow<'_, str> {
     if s.contains(' ') { Cow::Owned(s.replace(' ', "_")) } else { Cow::Borrowed(s) }
 }` },
+  // ---------- Concurrency ----------
+  { term: 'thread::spawn', cat: 'Concurrency', module: 11, desc: 'Starts an OS thread running a closure that must be `Send + \'static`. Returns a `JoinHandle` whose `join()` yields the result or the panic.', syntax: `let h = thread::spawn(move || work(data));
+let r = h.join().unwrap();` },
+  { term: 'thread::scope', cat: 'Concurrency', module: 11, desc: 'Spawns threads that may borrow local variables, all joined before the scope returns.', since: 'Rust 1.63', syntax: `thread::scope(|s| {
+    s.spawn(|| left.iter().sum::<i32>());
+});` },
+  { term: 'JoinHandle', cat: 'Concurrency', module: 11, desc: 'A handle to a running thread. `join()` waits and returns `Result<T, Box<dyn Any + Send>>`.', syntax: `if let Err(e) = h.join() { /* thread panicked */ }` },
+  { term: 'mpsc::channel', cat: 'Concurrency', module: 11, desc: 'A multi-producer, single-consumer channel. `send` moves the value, `recv` blocks, and iteration ends when all senders are dropped.', syntax: `let (tx, rx) = mpsc::channel();
+tx.send(msg)?;
+for m in rx {}` },
+  { term: 'sync_channel', cat: 'Concurrency', module: 11, desc: 'A bounded channel: `send` blocks when the buffer is full, giving back-pressure.', syntax: `let (tx, rx) = mpsc::sync_channel::<u64>(100);` },
+  { term: 'Mutex<T>', cat: 'Concurrency', module: 11, desc: 'Mutual exclusion that owns its data. `lock()` returns a guard that releases the lock when dropped.', syntax: `let m = Mutex::new(0);
+*m.lock().unwrap() += 1;` },
+  { term: 'Lock poisoning', cat: 'Concurrency', module: 11, desc: 'A mutex becomes poisoned if a thread panics while holding it. `lock()` then returns `Err`, and `into_inner()` recovers the guard.', syntax: `let g = m.lock().unwrap_or_else(|e| e.into_inner());` },
+  { term: 'RwLock<T>', cat: 'Concurrency', module: 11, desc: 'Many readers or one writer. `read()` and `write()` return guards.', syntax: `let r = lock.read().unwrap();
+let mut w = lock.write().unwrap();` },
+  { term: 'Arc<Mutex<T>>', cat: 'Concurrency', module: 11, desc: 'The standard pair for shared, mutable state across threads.', syntax: `let c = Arc::new(Mutex::new(0));
+let c2 = Arc::clone(&c);` },
+  { term: 'Condvar', cat: 'Concurrency', module: 11, desc: 'Lets a thread wait until another signals that a mutex-protected condition changed.', syntax: `let g = cv.wait_while(m.lock().unwrap(), |ready| !*ready).unwrap();` },
+  { term: 'Send', cat: 'Concurrency', module: 11, desc: 'Auto trait: a value of this type can be moved to another thread. `Rc` and `MutexGuard` are not `Send`.', syntax: `fn spawn<F: FnOnce() + Send + 'static>(f: F) {}` },
+  { term: 'Sync', cat: 'Concurrency', module: 11, desc: 'Auto trait: `&T` can be shared between threads. `Cell` and `RefCell` are not `Sync`.', syntax: `// T: Sync  <=>  &T: Send` },
+  { term: 'Data race', cat: 'Concurrency', module: 11, desc: 'Unsynchronised concurrent access where at least one is a write. Impossible in safe Rust. Deadlocks and logical races still are.', syntax: `// two threads, one &mut, one &: rejected at compile time` },
+  { term: 'Atomic types', cat: 'Concurrency', module: 11, desc: 'Lock-free single-value operations: `AtomicBool`, `AtomicUsize`, `AtomicU64`, `AtomicPtr` and more.', syntax: `COUNT.fetch_add(1, Ordering::Relaxed);
+flag.store(true, Ordering::Release);` },
+  { term: 'Ordering', cat: 'Concurrency', module: 11, desc: 'Memory ordering for atomics: `Relaxed`, `Acquire`, `Release`, `AcqRel`, `SeqCst`. Use `SeqCst` unless you can justify a weaker one.', syntax: `x.compare_exchange(0, 1, Ordering::AcqRel, Ordering::Acquire)` },
+  { term: 'Rayon', cat: 'Concurrency', module: 11, desc: 'A data-parallelism crate: `par_iter()` and `par_chunks()` run iterator pipelines on a work-stealing thread pool.', syntax: `use rayon::prelude::*;
+let s: f64 = v.par_iter().sum();` },
+  { term: 'Deadlock', cat: 'Concurrency', module: 11, desc: 'Threads waiting on each other\'s locks forever. Not prevented by the compiler: take locks in a consistent order and keep critical sections short.', syntax: `// A: lock(a) then lock(b)   B: lock(b) then lock(a)` },
 ]
