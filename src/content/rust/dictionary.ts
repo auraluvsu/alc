@@ -145,4 +145,46 @@ while let Some(t) = stack.pop() { }` },
 let Some(x) = o else { return };` },
   { term: '#[non_exhaustive]', cat: 'Pattern matching', module: 3, desc: 'Marks a public enum or struct as extensible, so other crates must use a wildcard arm. Lets library authors add variants without a breaking change.', syntax: `#[non_exhaustive]
 pub enum Error { Io, Parse }` },
+  // ---------- Modules and crates ----------
+  { term: 'Package', cat: 'Modules & crates', module: 4, desc: 'What Cargo builds and publishes, described by one `Cargo.toml`. It has at most one library crate and any number of binary crates.', syntax: `[package]
+name = "app"` },
+  { term: 'Crate', cat: 'Modules & crates', module: 4, desc: 'The unit of compilation: a library (`src/lib.rs`) or a binary (`src/main.rs`, `src/bin/*.rs`).', syntax: `use serde::Serialize;   // an external crate` },
+  { term: 'mod', cat: 'Modules & crates', module: 4, desc: 'Declares a module, inline or by loading `name.rs`. The module tree is declared in code, not implied by files.', syntax: `mod book;                 // src/book.rs
+mod util { pub fn f() {} }` },
+  { term: 'use', cat: 'Modules & crates', module: 4, desc: 'Brings a path into scope. Supports nesting, `as` renames and globs.', syntax: `use std::collections::{HashMap, HashSet};
+use std::fmt::Result as FmtResult;` },
+  { term: 'crate / self / super', cat: 'Modules & crates', module: 4, desc: 'Path prefixes: the crate root, the current module and the parent module.', syntax: `crate::exchange::book::Order
+super::helper()` },
+  { term: 'pub', cat: 'Modules & crates', module: 4, desc: 'Makes an item visible outside its module. Restrict it with `pub(crate)`, `pub(super)` or `pub(in path)`.', syntax: `pub struct S { pub a: i32, b: i32 }
+pub(crate) fn internal() {}` },
+  { term: 'pub use', cat: 'Modules & crates', module: 4, desc: 'Re-exports an item under this module\'s path, so the internal layout can differ from the public API.', syntax: `pub use self::book::Order;` },
+  { term: 'Prelude', cat: 'Modules & crates', module: 4, desc: 'Names imported into every module automatically: `Vec`, `String`, `Option`, `Result`, `Box`, `Some`, `None`, `Clone`, `Iterator` and more.', syntax: `// no import needed:
+let v: Vec<Option<String>> = Vec::new();` },
+  { term: 'Smart constructor', cat: 'Modules & crates', module: 4, desc: 'A private field plus a public `new` that validates input, so every value of the type is guaranteed valid.', syntax: `pub struct Cents(i64);
+impl Cents { pub fn new(v: i64) -> Option<Self> { /* ... */ } }` },
+  // ---------- Cargo ----------
+  { term: 'Workspace', cat: 'Cargo', module: 4, desc: 'A set of crates sharing one `target/` directory and `Cargo.lock`, with shared dependency and lint definitions.', syntax: `[workspace]
+members = ["crates/*"]
+resolver = "3"` },
+  { term: 'Feature', cat: 'Cargo', module: 4, desc: 'An optional, additive switch that compiles extra code or enables optional dependencies.', syntax: `[features]
+default = []
+json = ["dep:serde_json"]
+$ cargo build --features json` },
+  { term: 'cfg', cat: 'Cargo', module: 4, desc: 'Conditional compilation on features, OS, architecture or build mode. `cfg!` gives the same test as a `bool`.', syntax: `#[cfg(feature = "json")]
+#[cfg(target_os = "linux")]
+#[cfg(test)]` },
+  { term: 'Profile', cat: 'Cargo', module: 4, desc: 'Compiler settings for a build mode: `dev`, `release`, `test`, `bench` or a custom one.', syntax: `[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"` },
+  { term: 'Semver', cat: 'Cargo', module: 4, desc: 'Version requirements are ranges. `"1.2"` means `>=1.2.0, <2.0.0`, and `"0.3"` means `>=0.3.0, <0.4.0`.', syntax: `serde = "1.0.200"
+rand = ">=0.9, <0.11"` },
+  { term: 'Cargo.lock', cat: 'Cargo', module: 4, desc: 'Records the exact version of every dependency. Commit it for applications and leave it out for libraries (optional).', syntax: `cargo update -p serde     # refresh one dependency` },
+  { term: 'dev-dependencies', cat: 'Cargo', module: 4, desc: 'Dependencies used only by tests, examples and benchmarks. They are not part of the published crate\'s requirements.', syntax: `[dev-dependencies]
+proptest = "1"` },
+  { term: 'cargo doc / test --doc', cat: 'Cargo', module: 4, desc: '`cargo doc` renders `///` Markdown to HTML. Code blocks in doc comments run as tests with `cargo test`.', syntax: `cargo doc --open
+cargo test --doc` },
+  { term: 'rust-version (MSRV)', cat: 'Cargo', module: 4, desc: 'The minimum Rust version a crate promises to support. In the 2024 edition the resolver takes it into account.', since: 'Rust 1.84', syntax: `rust-version = "1.85"` },
+  { term: 'Edition migration', cat: 'Cargo', module: 4, desc: '`cargo fix --edition` rewrites code to compile under the next edition, after which you bump the edition in `Cargo.toml`.', since: 'Rust 2024', syntax: `cargo fix --edition
+# then: edition = "2024"` },
 ]

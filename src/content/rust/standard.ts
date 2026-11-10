@@ -139,4 +139,34 @@ let is_digit = matches!(c, '0'..='9');
 let v: Vec<_> = orders.iter().filter(|o| matches!(o, Order::Cancel(_))).collect();`,
     when: 'Filters and assertions over enum variants where a full `match` is noise.',
   },
+  // ---------------- Environment and process ----------------
+  {
+    name: 'env::args / env::var', header: 'std::env', cat: 'Environment', module: 4,
+    summary: 'Read command-line arguments and environment variables.',
+    what: '`env::args()` is an iterator over `String` arguments, where the first is the program name. `env::var("NAME")` returns `Result<String, VarError>`. `args_os` and `var_os` return `OsString` and never panic on invalid Unicode. For real CLIs prefer a parser such as `clap`.',
+    code: `use std::env;
+let mut args = env::args().skip(1);                 // skip the program name
+let path = args.next().unwrap_or_else(|| "data.csv".into());
+let level = env::var("LOG").unwrap_or_else(|_| "info".to_string());`,
+    when: 'Quick scripts and configuration through the environment. `env::args()` panics on non-Unicode arguments, so use `args_os` when that matters.',
+  },
+  {
+    name: 'process::exit / ExitCode', header: 'std::process', cat: 'Environment', module: 4,
+    summary: 'End the program with a status code.',
+    what: '`process::exit(code)` ends immediately, **without running destructors** of live values. Returning an `ExitCode` (or `Result` from `main`) is the cleaner way: it lets everything drop first.',
+    code: `use std::process::ExitCode;
+fn main() -> ExitCode {
+    if run().is_err() { return ExitCode::from(2); }
+    ExitCode::SUCCESS
+}`,
+    when: 'Command-line tools that report success or failure to a shell or CI. Avoid `exit` deep inside libraries.',
+  },
+  {
+    name: 'bool::then / then_some', header: 'core::bool', cat: 'Option & Result', module: 4,
+    summary: 'Turn a condition into an Option.',
+    what: '`cond.then_some(value)` gives `Some(value)` if true else `None` (the value is always evaluated). `cond.then(|| value)` evaluates the closure only if true.',
+    code: `let cents = (v >= 0).then_some(Cents(v));          // Option<Cents>
+let big = (n > 100).then(|| expensive(n));         // lazily computed`,
+    when: 'Smart constructors, validations and optional fields: it replaces `if cond { Some(x) } else { None }`.',
+  },
 ]
