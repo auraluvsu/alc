@@ -662,4 +662,35 @@ let total: f64 = stream::iter(syms)
     .await;`,
     when: 'Bounded-concurrency fan-out and processing sequences of events as they arrive.',
   },
+  // ---------------- Patterns and helpers ----------------
+  {
+    name: 'std::any::Any', header: 'std::any', cat: 'Traits', module: 13,
+    summary: 'Run-time type identity and downcasting.',
+    what: 'Every `\'static` type implements `Any`. `&dyn Any` offers `is::<T>()`, `downcast_ref::<T>()` and `downcast_mut::<T>()`, and `Box<dyn Any>::downcast::<T>()` returns a `Result`. `TypeId::of::<T>()` identifies a type. Since Rust 1.86 a `&dyn Sub` can be upcast to `&dyn Any` if `Sub: Any`.',
+    code: `use std::any::Any;
+fn describe(x: &dyn Any) -> &'static str {
+    if x.is::<i32>() { "i32" } else if x.downcast_ref::<String>().is_some() { "String" } else { "unknown" }
+}`,
+    when: 'Plugin systems, ECS-style component stores and heterogeneous maps. If you know the set of types, use an enum.',
+  },
+  {
+    name: 'PhantomData / marker types', header: 'core::marker', cat: 'Traits', module: 13,
+    summary: 'Carry type information that takes no space.',
+    what: '`PhantomData<T>` is a zero-sized value that tells the compiler a type "owns" or relates to `T`. It is used for type-state (`Handle<Open>`), units (`Length<Meters>`), and variance or drop-check control. `Send`, `Sync`, `Sized` and `Unpin` are the other marker traits.',
+    code: `use std::marker::PhantomData;
+struct Meters; struct Feet;
+struct Length<U>(f64, PhantomData<U>);
+impl<U> Length<U> { fn new(v: f64) -> Self { Length(v, PhantomData) } }
+// Length<Meters> and Length<Feet> are different types: mixing them is a compile error`,
+    when: 'Units of measure, state machines in types and FFI handles.',
+  },
+  {
+    name: 'Default::default / struct update', header: 'core::default', cat: 'Traits', module: 13,
+    summary: 'Lightweight alternative to builders for config structs.',
+    what: '`#[derive(Default)]` fills fields with their defaults. `Config { depth: 5, ..Default::default() }` overrides some. For richer cases write a `Builder` with chained `self`-consuming methods and `#[must_use]`.',
+    code: `#[derive(Debug, Default)]
+struct Config { depth: u8, verbose: bool, name: String }
+let c = Config { depth: 3, ..Default::default() };`,
+    when: 'Optional-heavy structs. Use a builder when fields are interdependent or validation is needed.',
+  },
 ]

@@ -457,4 +457,29 @@ tx.send(x).await?;` },
   { term: 'JoinSet', cat: 'Async', module: 12, desc: 'A collection of spawned tasks awaited as they complete, and aborted when dropped.', syntax: `let mut set = JoinSet::new();
 set.spawn(work());
 while let Some(r) = set.join_next().await {}` },
+  // ---------- Object-oriented design ----------
+  { term: 'Encapsulation', cat: 'OO design', module: 13, desc: 'Hiding fields behind a small public API so invariants always hold. In Rust, privacy is per module.', syntax: `pub struct Account { balance: i64 }
+impl Account { pub fn balance(&self) -> i64 { self.balance } }` },
+  { term: 'Composition over inheritance', cat: 'OO design', module: 13, desc: 'Rust has no struct inheritance: share state by embedding structs, and behaviour with traits and default methods.', syntax: `struct Car { engine: Engine }
+impl Car { fn start(&self) { self.engine.start() } }` },
+  { term: 'Delegation', cat: 'OO design', module: 13, desc: 'Forwarding a call to an embedded field by writing the method. Crates like `delegate` generate it.', syntax: `fn len(&self) -> usize { self.items.len() }` },
+  { term: 'Default method', cat: 'OO design', module: 13, desc: 'A trait method with a body that implementors may override. The Rust way of sharing behaviour.', syntax: `trait Describe { fn name(&self) -> String; fn describe(&self) -> String { self.name() } }` },
+  { term: 'Supertrait (interface inheritance)', cat: 'OO design', module: 13, desc: '`trait B: A` requires every implementor of `B` to implement `A` too.', syntax: `trait Vehicle: Describe { fn wheels(&self) -> u32; }` },
+  { term: 'Sealed trait', cat: 'OO design', module: 13, desc: 'A public trait that only your crate can implement, via a private supertrait. Lets you add methods without breaking changes.', syntax: `mod private { pub trait Sealed {} }
+pub trait Format: private::Sealed {}` },
+  { term: 'Expression problem', cat: 'OO design', module: 13, desc: 'Traits make adding types easy and operations hard. Enums make adding operations easy and variants hard.', syntax: `// trait: new type = new impl
+// enum: new operation = new match` },
+  { term: 'Trait object vs enum', cat: 'OO design', module: 13, desc: 'Use `dyn Trait` for open sets (plugins) and `enum` for closed sets known at compile time.', syntax: `Vec<Box<dyn Shape>>   // open
+enum Shape { Circle(f64), Rect(f64, f64) }   // closed` },
+  { term: 'dyn Any / downcast', cat: 'OO design', module: 13, desc: 'Recover a concrete type from a trait object with `downcast_ref`. Trait upcasting to `dyn Any` works when the trait extends `Any`.', since: 'Rust 1.86', syntax: `(x as &dyn Any).downcast_ref::<Circle>()` },
+  { term: 'self: Box<Self>', cat: 'OO design', module: 13, desc: 'A method receiver that consumes a boxed value, used for state transitions in trait objects.', syntax: `fn approve(self: Box<Self>) -> Box<dyn State>` },
+  { term: 'State pattern', cat: 'OO design', module: 13, desc: 'An object delegates to a current state object that returns the next state. Rust stores it as `Option<Box<dyn State>>` and uses `take()`.', syntax: `if let Some(s) = self.state.take() { self.state = Some(s.approve()); }` },
+  { term: 'Type-state pattern', cat: 'OO design', module: 13, desc: 'Encode the state in the type so each transition consumes one type and returns another. Invalid sequences do not compile.', syntax: `impl DraftPost { fn request_review(self) -> PendingPost { /* ... */ } }` },
+  { term: 'Builder pattern', cat: 'OO design', module: 13, desc: 'Construct a value step by step with chained methods, then `build()`. Rust has no default arguments or overloading.', syntax: `Order::builder().symbol("XAU").qty(10).build()` },
+  { term: 'PhantomData', cat: 'OO design', module: 13, desc: 'A zero-sized marker that lets a type carry a generic parameter it does not store, as in type-state APIs.', syntax: `struct Handle<S> { id: u32, _s: PhantomData<S> }` },
+  { term: '#[must_use]', cat: 'OO design', module: 13, desc: 'Warns when a value or function result is ignored. Useful on builders, guards and `Result`-like types.', syntax: `#[must_use = "call build()"]
+struct Builder;` },
+  { term: 'Newtype pattern', cat: 'OO design', module: 13, desc: 'A single-field tuple struct that creates a distinct, validated type at no runtime cost.', syntax: `struct Email(String);
+struct UserId(u64);` },
+  { term: 'Strategy / Observer via closures', cat: 'OO design', module: 13, desc: 'Closures and `Vec<Box<dyn Fn>>` replace many class-based patterns.', syntax: `handlers: Vec<Box<dyn Fn(&Event)>>` },
 ]
