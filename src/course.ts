@@ -3,8 +3,8 @@ import type { DictEntry, Module } from './content/types'
 import type { StdEntry } from './content/standard'
 
 // Every language a "Coming from…" note or code comparison can use.
-export type LangId = 'python' | 'ts' | 'go' | 'java' | 'cpp'
-export const ALL_LANGS: Record<LangId, string> = { python: 'Python', ts: 'TypeScript', go: 'Go', java: 'Java', cpp: 'C++' }
+export type LangId = 'python' | 'ts' | 'go' | 'java' | 'cpp' | 'rust'
+export const ALL_LANGS: Record<LangId, string> = { python: 'Python', ts: 'TypeScript', go: 'Go', java: 'Java', cpp: 'C++', rust: 'Rust' }
 
 /** Everything that makes one language's course different from another. */
 export type Course = {

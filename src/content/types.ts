@@ -19,8 +19,8 @@ export type Block =
   | { kind: 'new23'; text: string }
   | { kind: 'pitfall'; text: string }
   | { kind: 'poly'; pseudo: string; python: string; ts: string; go: string; java: string; cpp: string; caption?: string }
-  | { kind: 'code'; code: string; caption?: string; lang?: 'python' | 'ts' | 'go' | 'java' | 'cpp' }
-  | { kind: 'compare'; python?: string; ts?: string; go?: string; java?: string; cpp?: string; note?: string }
+  | { kind: 'code'; code: string; caption?: string; lang?: 'python' | 'ts' | 'go' | 'java' | 'cpp' | 'rust' }
+  | { kind: 'compare'; python?: string; ts?: string; go?: string; java?: string; cpp?: string; rust?: string; note?: string }
   | {
       kind: 'check'
       q: string

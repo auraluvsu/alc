@@ -15,6 +15,7 @@ The npm package is still named `cpp-tour` because the project began as a C++ cou
 | Python | `/python` | 28 | `src/content/python` | `p01..` |
 | Go | `/go` | 15 | `src/content/go` | `g01..` |
 | Java (Core Java for the Impatient) | `/java` | 14 | `src/content/java` | `j01..` |
+| Rust (TRPL, 2024 edition) | `/rust` | 14 | `src/content/rust` | `r01..` |
 | C++ (Tour of C++) | `/tour` | 18 | `src/content/` (flat, legacy) | `m01..m18` |
 | Data Analytics | `/data` | 12 | `src/content/data` | `d01..` |
 | Machine Learning | `/ml` | 12 | `src/content/ml` | `l01..` |
@@ -140,5 +141,7 @@ If the course teaches a language not yet in `LangId` (`python|ts|go|java|cpp`), 
 - `e2e` needs a fresh `npm run build` first. `.env.artifact` is committed; `*.local` is ignored.
 
 ## Current work
+
+The Rust course (`src/content/rust`, `src/courses/rust.ts`) is written: modules 1 to 12 follow The Rust Programming Language, and 13 to 14 are added (OO design, advanced Rust). `LangId` includes `rust`, and `highlight()` has a Rust tokenizer (lifetimes, attributes, raw strings, macro calls). The palette is rust orange with verdigris green. `poly` blocks and `CodeLang` deliberately have no Rust key, so Foundations is unchanged. `Inline` supports only backticks and `**bold**`, so avoid `*italics*` in content.
 
 The Java course (`src/content/java`, `src/courses/java.ts`) is written. Modules 1 to 12 follow the book's chapters, and 13 to 14 are added (OO design, modern concurrency). `java` is both the course's `mainLang` and a comparison language in other courses. `highlight()` has a Java-specific keyword list, and the palette is Java red with the logo's blue. A C course would need a new `LangId` and the plumbing listed under "Add a course".

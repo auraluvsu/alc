@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 export const MODE: 'path' | 'hash' = import.meta.env.VITE_ROUTER === 'hash' ? 'hash' : 'path'
 
 /** Top-level sections. A hash's first segment is matched against these. */
-export const SECTIONS = ['tour', 'design', 'go', 'java', 'python', 'data', 'ml', 'dl', 'systems', 'intro'] as const
+export const SECTIONS = ['tour', 'design', 'go', 'java', 'rust', 'python', 'data', 'ml', 'dl', 'systems', 'intro'] as const
 
 function hashToPath(hash: string): string {
   const h = hash.replace(/^#/, '')

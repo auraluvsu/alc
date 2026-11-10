@@ -9,7 +9,7 @@ export function Code({ code, label, cls }: { code: string; label?: string; cls?:
   const course = useCourse()
   label ??= course.codeLabel
   cls ??= course.mainLang
-  const lang = cls === 'python' || cls === 'pseudo' ? 'python' : cls === 'java' ? 'java' : undefined   // '#' comments; Java keywords
+  const lang = cls === 'python' || cls === 'pseudo' ? 'python' : cls === 'java' ? 'java' : cls === 'rust' ? 'rust' : undefined   // '#' comments; Java and Rust keywords
   const [copied, setCopied] = useState(false)
   const copy = () => {
     navigator.clipboard?.writeText(code).then(
