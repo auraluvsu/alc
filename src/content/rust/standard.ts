@@ -379,4 +379,56 @@ fn pick(flag: bool) -> Box<dyn Iterator<Item = u32>> {
 }`,
     when: 'Library functions that produce sequences lazily and should not allocate a `Vec`.',
   },
+  // ---------------- I/O ----------------
+  {
+    name: 'fs::read_to_string / write / read_dir', header: 'std::fs', cat: 'I/O', module: 8,
+    summary: 'Read and write whole files in one call.',
+    what: '`fs::read_to_string(path)` returns the file as a `String` (error if it is not UTF-8), `fs::read` gives `Vec<u8>`, `fs::write(path, data)` creates or truncates, `fs::read_dir` lists entries, and `create_dir_all`, `remove_file`, `rename`, `copy`, `metadata` do what they say. Paths can be `&str`, `String`, `Path` or `PathBuf`.',
+    code: `use std::fs;
+let text = fs::read_to_string("config.toml")?;
+fs::write("out.txt", format!("{} bytes", text.len()))?;
+for entry in fs::read_dir(".")? {
+    let e = entry?;
+    println!("{}", e.file_name().to_string_lossy());
+}`,
+    when: 'Small files. For large files or streaming, use `File` with `BufReader` and read line by line.',
+  },
+  {
+    name: 'BufRead::lines / BufReader', header: 'std::io', cat: 'I/O', module: 8,
+    summary: 'Read text line by line without loading everything.',
+    what: '`BufReader::new(File::open(p)?)` buffers reads. `.lines()` yields `io::Result<String>` for each line (without the newline). `read_line(&mut buf)` reuses one `String`, which is faster. `stdin().lock().lines()` reads standard input.',
+    code: `use std::{fs::File, io::{BufRead, BufReader}};
+let f = BufReader::new(File::open("ticks.csv")?);
+let mut n = 0;
+for line in f.lines() {
+    let line = line?;
+    if line.starts_with('#') { continue; }
+    n += 1;
+}`,
+    when: 'Logs, CSV and any file that may be larger than memory.',
+  },
+  {
+    name: 'Path / PathBuf', header: 'std::path', cat: 'I/O', module: 8,
+    summary: 'Cross-platform file paths, as borrowed and owned types.',
+    what: '`Path` is the borrowed form (like `&str`), `PathBuf` the owned one (like `String`). `join`, `parent`, `file_name`, `extension`, `with_extension`, `exists`, `is_dir` and `components` work without string manipulation. Convert to text with `display()` or `to_str()` (which may fail for non-UTF-8 names).',
+    code: `use std::path::{Path, PathBuf};
+let mut p = PathBuf::from("/data");
+p.push("2026"); p.push("trades.csv");
+assert_eq!(p.extension().and_then(|e| e.to_str()), Some("csv"));
+let out = p.with_extension("parquet");
+println!("{}", out.display());`,
+    when: 'Any file system code. Never build paths by concatenating strings with `/`.',
+  },
+  {
+    name: 'io::stdin / stdout / Write', header: 'std::io', cat: 'I/O', module: 8,
+    summary: 'Standard streams and the Read / Write traits.',
+    what: '`io::stdin().read_line(&mut s)` reads one line. `io::stdout().lock()` gives a handle for fast repeated writes, and `writeln!` writes to any `Write`. `flush()` forces buffered output out, which matters for prompts printed with `print!`.',
+    code: `use std::io::{self, Write};
+print!("name> ");
+io::stdout().flush()?;
+let mut name = String::new();
+io::stdin().read_line(&mut name)?;
+let name = name.trim();`,
+    when: 'Interactive tools and pipelines. Wrap in `BufWriter` for large output.',
+  },
 ]

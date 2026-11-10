@@ -302,4 +302,30 @@ impl<'a> Parser<'a> {}` },
 fn f(p: &Parser<'_>) {}` },
   { term: 'Precise capturing use<..>', cat: 'Lifetimes', module: 7, desc: 'Lists exactly which generic parameters and lifetimes a returned `impl Trait` captures.', since: 'Rust 1.82', syntax: `fn f<'a>(x: &'a str) -> impl Iterator<Item = u8> + use<> { /* owned */ }` },
   { term: 'Higher-ranked bound for<\'a>', cat: 'Lifetimes', module: 7, desc: 'A bound that must hold for every lifetime. `Fn(&str) -> &str` is sugar for it.', syntax: `F: for<'x> Fn(&'x str) -> &'x str` },
+  // ---------- Testing ----------
+  { term: '#[test]', cat: 'Testing', module: 8, desc: 'Marks a function as a test. It passes if it returns normally (or `Ok`) and fails if it panics.', syntax: `#[test]
+fn adds() { assert_eq!(2 + 2, 4); }` },
+  { term: '#[cfg(test)]', cat: 'Testing', module: 8, desc: 'Compiles the item only when testing. Unit tests live in a `tests` module with this attribute.', syntax: `#[cfg(test)]
+mod tests { use super::*; }` },
+  { term: 'assert! / assert_eq! / assert_ne!', cat: 'Testing', module: 8, desc: 'Panic with a message when a condition fails. The equality forms print both sides and need `Debug + PartialEq`.', syntax: `assert!(x > 0, "bad {x}");
+assert_eq!(a, b);` },
+  { term: '#[should_panic]', cat: 'Testing', module: 8, desc: 'The test passes only if it panics. `expected` checks the message.', syntax: `#[test]
+#[should_panic(expected = "overflow")]
+fn t() { /* ... */ }` },
+  { term: '#[ignore]', cat: 'Testing', module: 8, desc: 'Skips a test unless run with `-- --ignored`.', syntax: `#[test] #[ignore = "slow"] fn big() {}` },
+  { term: 'Integration test', cat: 'Testing', module: 8, desc: 'A file in `tests/`, compiled as a separate crate that sees only the public API.', syntax: `// tests/api.rs
+use my_lib::mid;` },
+  { term: 'Doc test', cat: 'Testing', module: 8, desc: 'A code block in a `///` comment, compiled and run by `cargo test`. Fence attributes: `no_run`, `ignore`, `should_panic`, `compile_fail`.', syntax: `/// \`\`\`
+/// assert_eq!(my_lib::mid(1.0, 3.0), 2.0);
+/// \`\`\`` },
+  { term: 'cargo test flags', cat: 'Testing', module: 8, desc: 'Filter by name, select `--lib`, `--doc` or `--test name`, and pass harness flags after `--`.', syntax: `cargo test mid
+cargo test -- --nocapture --test-threads=1` },
+  { term: 'proptest / criterion / insta', cat: 'Testing', module: 8, desc: 'Popular testing crates: property-based testing, statistical benchmarks and snapshot testing.', syntax: `proptest! { #[test] fn p(x in 0..100) { /* ... */ } }` },
+  // ---------- Command-line programs ----------
+  { term: 'env::args', cat: 'Command line', module: 8, desc: 'Iterator over command-line arguments. The first item is the program name.', syntax: `let args: Vec<String> = std::env::args().collect();` },
+  { term: 'clap', cat: 'Command line', module: 8, desc: 'The standard argument-parsing crate. A derive on a struct gives flags, subcommands, `--help` and validation.', syntax: `#[derive(clap::Parser)]
+struct Args { #[arg(short, long)] verbose: bool, path: PathBuf }` },
+  { term: 'stdout vs stderr', cat: 'Command line', module: 8, desc: '`println!` writes results to stdout and `eprintln!` writes diagnostics to stderr, so pipelines stay clean.', syntax: `eprintln!("error: {e}");` },
+  { term: 'BufReader / BufWriter', cat: 'Command line', module: 8, desc: 'Wrap a reader or writer to batch system calls. Essential for line-by-line I/O.', syntax: `let out = BufWriter::new(io::stdout().lock());` },
+  { term: 'Thin main', cat: 'Command line', module: 8, desc: 'A pattern: `main.rs` parses arguments and reports errors, and `lib.rs` holds the logic so it can be tested.', syntax: `fn main() { if let Err(e) = app::run() { eprintln!("{e}"); std::process::exit(1) } }` },
 ]
