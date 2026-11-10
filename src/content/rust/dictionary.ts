@@ -65,4 +65,46 @@ let s = &v[1..3];` },
   { term: 'fn', cat: 'Functions', module: 1, desc: 'Declares a function. Parameter and return types are mandatory, and the last expression without a semicolon is the result.', syntax: `fn add(a: i32, b: i32) -> i32 { a + b }` },
   { term: 'Doc comment', cat: 'Functions', module: 1, desc: '`///` documents the next item, `//!` the enclosing one. Markdown, rendered by `cargo doc`.', syntax: `/// Adds two numbers.
 fn add(a: i32, b: i32) -> i32 { a + b }` },
+  // ---------- Ownership ----------
+  { term: 'Ownership', cat: 'Ownership', module: 2, desc: 'Every value has exactly one owner. When the owner goes out of scope the value is dropped and its resources freed.', syntax: `{
+    let s = String::from("x");
+}   // s dropped here` },
+  { term: 'Move', cat: 'Ownership', module: 2, desc: 'Transfers ownership. Assignment, passing and returning move non-`Copy` values, and the old name becomes unusable.', syntax: `let a = String::new();
+let b = a;     // a moved
+takes(b);      // b moved` },
+  { term: 'Copy', cat: 'Ownership', module: 2, desc: 'A marker trait for types duplicated bit for bit on assignment instead of moved. Cannot be implemented by types that own resources.', syntax: `#[derive(Clone, Copy)]
+struct P { x: f64, y: f64 }` },
+  { term: 'Clone', cat: 'Ownership', module: 2, desc: 'Explicit duplication with `.clone()`. For `String` and `Vec` it is a deep copy, for `Rc` and `Arc` a reference-count bump.', syntax: `let b = a.clone();` },
+  { term: 'Drop', cat: 'Ownership', module: 2, desc: 'The destructor trait. `drop` runs when an owner goes out of scope, in reverse declaration order. Call `std::mem::drop(x)` to drop early.', syntax: `impl Drop for Guard {
+    fn drop(&mut self) { println!("bye"); }
+}` },
+  { term: 'mem::take / replace / swap', cat: 'Ownership', module: 2, desc: 'Move a value out of a `&mut` by leaving something valid behind. `take` leaves `Default`, `replace` leaves what you give, `swap` exchanges two places.', syntax: `let old = std::mem::take(&mut self.buf);
+let prev = std::mem::replace(&mut x, 5);
+std::mem::swap(&mut a, &mut b);` },
+  { term: 'Partial move', cat: 'Ownership', module: 2, desc: 'Moving one field out of a struct. The remaining fields stay usable, but the struct as a whole does not.', syntax: `let name = person.name;   // moves one field
+println!("{}", person.age);` },
+  // ---------- Borrowing ----------
+  { term: '&T (shared reference)', cat: 'Borrowing', module: 2, desc: 'A read-only borrow. Any number can exist at once, and they are `Copy`.', syntax: `fn len(s: &String) -> usize { s.len() }` },
+  { term: '&mut T (exclusive reference)', cat: 'Borrowing', module: 2, desc: 'A unique read-write borrow. While it lives, no other reference to the value may be used.', syntax: `fn add(v: &mut Vec<i32>) { v.push(1); }
+add(&mut v);` },
+  { term: 'Borrow checker', cat: 'Borrowing', module: 2, desc: 'The compiler pass that enforces: one `&mut` xor many `&`, and references must not outlive their owner.', syntax: `error[E0502]: cannot borrow \`v\` as mutable
+                because it is also borrowed as immutable` },
+  { term: 'Dereference *', cat: 'Borrowing', module: 2, desc: 'Follows a reference to its value. Needed for assignment through `&mut` or to copy out a `Copy` value. Method calls auto-dereference.', syntax: `*count += 1;
+let n = *r;` },
+  { term: 'NLL (non-lexical lifetimes)', cat: 'Borrowing', module: 2, desc: 'A borrow lasts until its last use, not to the end of its block.', syntax: `let r = &s;
+println!("{r}");
+s.push('x');       // fine: r is no longer used` },
+  { term: 'Two-phase borrow', cat: 'Borrowing', module: 2, desc: 'Lets `v.push(v.len())` compile: the mutable borrow is reserved first and only activated after the arguments are evaluated.', syntax: `v.push(v.len());` },
+  { term: 'Dangling reference', cat: 'Borrowing', module: 2, desc: 'A reference to freed data. Impossible in safe Rust, since the compiler rejects any reference that would outlive its owner.', syntax: `fn f() -> &String { let s = String::new(); &s }  // error` },
+  // ---------- Slices ----------
+  { term: 'Slice', cat: 'Slices', module: 2, desc: 'A borrowed view of contiguous elements: a pointer and a length. `&[T]` for sequences and `&str` for text.', syntax: `let mid: &[i32] = &a[1..4];
+let w: &str = &s[0..5];` },
+  { term: '&str', cat: 'Slices', module: 2, desc: 'A borrowed UTF-8 string slice. String literals are `&\'static str`. Prefer it over `&String` in parameters.', syntax: `fn greet(name: &str) {}
+greet("Ada"); greet(&owned);` },
+  { term: 'Deref coercion', cat: 'Slices', module: 2, desc: 'The compiler turns `&String` into `&str`, `&Vec<T>` into `&[T]` and `&Box<T>` into `&T` automatically where a reference is expected.', syntax: `let s = String::from("x");
+greet(&s);          // &String -> &str` },
+  { term: 'split_at_mut / get_disjoint_mut', cat: 'Slices', module: 2, desc: 'Get several non-overlapping `&mut` references into one slice. `get_disjoint_mut` checks distinct indices at runtime.', since: 'Rust 1.86', syntax: `let (a, b) = v.split_at_mut(2);
+let [x, y] = v.get_disjoint_mut([0, 3]).unwrap();` },
+  { term: 'char boundary', cat: 'Slices', module: 2, desc: 'Byte offsets in a `&str` must fall on UTF-8 character boundaries, or slicing panics. `str::get` returns `None` instead.', syntax: `s.get(0..2)            // Option<&str>
+s.is_char_boundary(2)` },
 ]
