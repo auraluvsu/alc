@@ -486,4 +486,58 @@ let cfg = map.entry(key).or_insert_with(|| Config::load());
 let n = opt.unwrap_or_else(|| expensive_default());`,
     when: 'Use the lazy forms (`_else`, `_with`) whenever the default is costly to compute or allocates.',
   },
+  // ---------------- Smart pointers ----------------
+  {
+    name: 'Rc / Arc', header: 'std::rc, std::sync', cat: 'Smart pointers', module: 10,
+    summary: 'Shared ownership by reference counting.',
+    what: '`Rc::new(v)` and `Arc::new(v)` allocate with a count. `Rc::clone(&a)` bumps it. `strong_count` and `weak_count` report counts, `ptr_eq` compares addresses, `try_unwrap` yields the inner value if unique, `get_mut` borrows mutably if unique and `make_mut` clones the data only when shared. Contents are read-only without interior mutability. `Arc` is the thread-safe version.',
+    code: `use std::sync::Arc;
+let cfg = Arc::new(Config::load());
+let handles: Vec<_> = (0..4).map(|_| {
+    let cfg = Arc::clone(&cfg);
+    std::thread::spawn(move || cfg.depth)
+}).collect();`,
+    when: 'Data genuinely owned by several parts: configuration, caches, graphs, shared read-only tables. Not a way to dodge the borrow checker in ordinary code.',
+  },
+  {
+    name: 'RefCell / Cell', header: 'std::cell', cat: 'Smart pointers', module: 10,
+    summary: 'Mutation through a shared reference, checked at run time.',
+    what: '`Cell<T>` replaces its value (`set`, `replace`, `take`, `update`) and reads it for `Copy` types with `get`. `RefCell<T>` gives guards: `borrow()` (shared) and `borrow_mut()` (exclusive), panicking on conflicts. `try_borrow` and `try_borrow_mut` return a `Result`. Neither is thread-safe.',
+    code: `use std::{cell::RefCell, rc::Rc};
+let log = Rc::new(RefCell::new(Vec::<String>::new()));
+let l2 = Rc::clone(&log);
+l2.borrow_mut().push("event".into());
+assert_eq!(log.borrow().len(), 1);`,
+    when: 'Single-threaded shared mutable state (observers, trees with parent links, caches behind a `&self` API). On several threads use `Mutex`/`RwLock` instead.',
+  },
+  {
+    name: 'LazyLock / OnceLock / OnceCell', header: 'std::sync, std::cell', cat: 'Smart pointers', module: 10, since: 'Rust 1.80',
+    summary: 'Initialise a global or field exactly once.',
+    what: '`LazyLock::new(|| value)` in a `static` runs the closure on first access, thread-safely. `OnceLock::set` / `get_or_init` initialise from runtime data. `LazyCell` and `OnceCell` are the single-threaded forms usable in fields and locals.',
+    code: `use std::sync::LazyLock;
+static LEVELS: LazyLock<Vec<f64>> = LazyLock::new(|| (1..=10).map(|n| n as f64 * 0.5).collect());
+fn level(i: usize) -> f64 { LEVELS[i] }`,
+    when: 'Lookup tables, compiled regexes, parsed configuration. These replace the `lazy_static!` macro and `once_cell` crate.',
+  },
+  {
+    name: 'Cow', header: 'std::borrow', cat: 'Smart pointers', module: 10,
+    summary: 'Borrow when possible, own when needed.',
+    what: '`Cow<\'a, B>` is either `Borrowed(&B)` or `Owned(B::Owned)`. `to_mut()` clones into an owned value on first write, `into_owned()` always yields an owned value, and it derefs to `&B`. `String::from_utf8_lossy` and many parsing helpers return one.',
+    code: `use std::borrow::Cow;
+fn trim_prefix<'a>(s: &'a str) -> Cow<'a, str> {
+    match s.strip_prefix("0x") { Some(r) => Cow::Borrowed(r), None => Cow::Owned(format!("{s}")) }
+}
+let mut c = Cow::Borrowed("abc");
+c.to_mut().push('d');            // clones now, becomes Owned("abcd")`,
+    when: 'Functions that usually return their input unchanged but occasionally need a modified copy, which avoids allocating in the common case.',
+  },
+  {
+    name: 'Box<dyn Trait> and Box::leak', header: 'std::boxed', cat: 'Smart pointers', module: 10,
+    summary: 'Heap-allocate a value, erase its type, or leak it for \'static.',
+    what: '`Box::new(v)` allocates. `Box<dyn Trait>` erases the concrete type for heterogeneous collections. `Box::leak(b)` gives a `&\'static mut T` (and never frees it), useful for config you create once. `Box<str>` and `Box<[T]>` are compact, fixed-size owned slices.',
+    code: `let animals: Vec<Box<dyn Speak>> = vec![Box::new(Dog), Box::new(Cat)];
+let cfg: &'static Config = Box::leak(Box::new(Config::load()));
+let name: Box<str> = "alc".into();`,
+    when: 'Plugins, recursive data and one-time globals. Prefer `enum` for a closed set of types.',
+  },
 ]

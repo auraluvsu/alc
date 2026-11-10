@@ -371,4 +371,33 @@ v.chunk_by(|a, b| a == b)` },
   { term: 'repeat_n / from_fn / successors', cat: 'Iterators', module: 9, desc: 'Create iterators from nothing: `repeat_n(x, n)`, `from_fn(|| ...)`, `successors(first, |prev| next)`.', syntax: `let it = std::iter::successors(Some(1), |&x| (x < 100).then_some(x * 2));` },
   { term: 'Lazy evaluation', cat: 'Iterators', module: 9, desc: 'Adapters do nothing until a consumer pulls items. This enables early exit and streaming.', syntax: `let first = huge.iter().map(f).find(p);   // stops at the first match` },
   { term: 'Zero-cost abstraction', cat: 'Iterators', module: 9, desc: 'High-level code (iterator chains, generics) compiles to the same machine code as a hand-written loop.', syntax: `v.iter().filter(p).map(f).sum::<i32>()` },
+  // ---------- Smart pointers ----------
+  { term: 'Box<T>', cat: 'Smart pointers', module: 10, desc: 'A single-owner pointer to a heap value, freed when dropped. For recursive types, trait objects and moving large values cheaply.', syntax: `enum List { Cons(i32, Box<List>), Nil }
+let s: Box<dyn Shape> = Box::new(Circle(1.0));` },
+  { term: 'Deref / DerefMut', cat: 'Smart pointers', module: 10, desc: 'Traits that make a wrapper act like a reference to its contents, enabling `*x` and deref coercion.', syntax: `impl<T> Deref for MyBox<T> { type Target = T; fn deref(&self) -> &T { &self.0 } }` },
+  { term: 'RAII', cat: 'Smart pointers', module: 10, desc: 'Resource Acquisition Is Initialisation: owning a value owns the resource (file, lock, memory), and dropping releases it on every path.', syntax: `{ let guard = mutex.lock().unwrap(); }   // unlocked here` },
+  { term: 'mem::forget / ManuallyDrop', cat: 'Smart pointers', module: 10, desc: 'Skip a destructor. Safe, but leaks. Used with FFI and low-level code.', syntax: `std::mem::forget(handle);` },
+  { term: 'Rc<T>', cat: 'Smart pointers', module: 10, desc: 'Single-threaded reference-counted shared ownership. Cloning copies the pointer and increments the count.', syntax: `let a = Rc::new(5);
+let b = Rc::clone(&a);
+Rc::strong_count(&a)   // 2` },
+  { term: 'Arc<T>', cat: 'Smart pointers', module: 10, desc: 'Atomically reference-counted `Rc`, safe to share across threads when `T: Send + Sync`.', syntax: `let d = Arc::new(vec![1]);
+let d2 = Arc::clone(&d);
+thread::spawn(move || d2.len());` },
+  { term: 'make_mut / get_mut / try_unwrap', cat: 'Smart pointers', module: 10, desc: 'Mutable access to `Rc`/`Arc` contents: clone-on-write, only if unique, or extract the value if last owner.', syntax: `Arc::make_mut(&mut a).push(1);
+Rc::try_unwrap(rc)` },
+  { term: 'Weak<T>', cat: 'Smart pointers', module: 10, desc: 'A non-owning pointer to an `Rc`/`Arc` allocation. `upgrade()` returns `Option` and is `None` once the value is gone.', syntax: `let w = Rc::downgrade(&rc);
+if let Some(r) = w.upgrade() {}` },
+  { term: 'Reference cycle', cat: 'Smart pointers', module: 10, desc: 'Strong `Rc` references that form a loop never reach zero and leak. Break them with `Weak` or avoid pointers using indices.', syntax: `// parent: Weak<Node>, children: Vec<Rc<Node>>` },
+  { term: 'Cell<T>', cat: 'Interior mutability', module: 10, desc: 'Interior mutability for simple values: `get`, `set`, `replace`, `take`, `update`. Never hands out references.', syntax: `let c = Cell::new(1);
+c.set(c.get() + 1);` },
+  { term: 'RefCell<T>', cat: 'Interior mutability', module: 10, desc: 'Borrow rules checked at run time: `borrow()` and `borrow_mut()` panic on conflict. Single-threaded.', syntax: `let r = RefCell::new(vec![]);
+r.borrow_mut().push(1);` },
+  { term: 'Rc<RefCell<T>>', cat: 'Interior mutability', module: 10, desc: 'The pattern for shared, mutable data on one thread. The multi-threaded form is `Arc<Mutex<T>>`.', syntax: `let s = Rc::new(RefCell::new(0));
+*s.borrow_mut() += 1;` },
+  { term: 'OnceCell / OnceLock', cat: 'Interior mutability', module: 10, desc: 'A cell that can be set once. `OnceLock` is thread-safe and suitable for statics.', since: 'Rust 1.70', syntax: `static CFG: OnceLock<String> = OnceLock::new();
+CFG.set("x".into()).ok();` },
+  { term: 'LazyCell / LazyLock', cat: 'Interior mutability', module: 10, desc: 'A value computed on first access. `LazyLock` is for `static` items.', since: 'Rust 1.80', syntax: `static T: LazyLock<Vec<u8>> = LazyLock::new(|| build());` },
+  { term: 'Cow<\'a, B>', cat: 'Smart pointers', module: 10, desc: 'Clone-on-write: either a borrowed value or an owned one, allocating only when modification is needed.', syntax: `fn clean(s: &str) -> Cow<'_, str> {
+    if s.contains(' ') { Cow::Owned(s.replace(' ', "_")) } else { Cow::Borrowed(s) }
+}` },
 ]
