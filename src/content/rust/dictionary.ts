@@ -258,4 +258,48 @@ bail!("bad line {n}");` },
   { term: 'catch_unwind', cat: 'Errors', module: 6, desc: 'Catches a panic at a boundary (FFI, thread pools). Not a general exception mechanism.', syntax: `let r = std::panic::catch_unwind(|| risky());` },
   { term: 'ExitCode / Termination', cat: 'Errors', module: 6, desc: '`main` may return `()`, `Result<(), E: Debug>` or `ExitCode`. An `Err` prints `Error: {e:?}` and exits with status 1.', syntax: `fn main() -> ExitCode { ExitCode::from(2) }` },
   { term: 'is_ok_and / is_err_and', cat: 'Errors', module: 6, desc: 'Test the contents of a `Result` as a bool without unwrapping.', since: 'Rust 1.70', syntax: `res.is_ok_and(|n| n > 0)` },
+  // ---------- Generics and traits ----------
+  { term: 'Generics', cat: 'Generics & traits', module: 7, desc: 'Type parameters let one definition work for many types. The compiler generates a specialised copy per concrete type (monomorphisation).', syntax: `fn largest<T: PartialOrd>(v: &[T]) -> &T { /* ... */ }
+struct Point<T> { x: T, y: T }` },
+  { term: 'Turbofish ::<>', cat: 'Generics & traits', module: 7, desc: 'Supplies generic arguments explicitly when inference cannot decide.', syntax: `let n = "5".parse::<i32>()?;
+let v = Vec::<u8>::new();
+iter.collect::<Vec<_>>()` },
+  { term: 'Const generics', cat: 'Generics & traits', module: 7, desc: 'Generic parameters that are values, such as array lengths.', syntax: `fn sum<const N: usize>(a: [i32; N]) -> i32 { a.iter().sum() }
+struct Buf<const N: usize>([u8; N]);` },
+  { term: 'trait', cat: 'Generics & traits', module: 7, desc: 'A set of methods a type can implement. May include default methods, associated types and constants.', syntax: `trait Summary {
+    fn author(&self) -> String;
+    fn summarise(&self) -> String { format!("by {}", self.author()) }
+}` },
+  { term: 'impl Trait for Type', cat: 'Generics & traits', module: 7, desc: 'Implements a trait for a type. Allowed if your crate defines the trait or the type (orphan rule).', syntax: `impl Summary for Tweet { fn author(&self) -> String { /* ... */ } }` },
+  { term: 'Trait bound / where', cat: 'Generics & traits', module: 7, desc: 'Constrains what a type parameter must implement. `where` clauses keep long bounds readable.', syntax: `fn f<T: Clone + Debug>(x: T) {}
+fn g<T>(x: T) where T: Clone + Debug {}` },
+  { term: 'Associated type', cat: 'Generics & traits', module: 7, desc: 'A type member of a trait chosen by each implementor, such as `Iterator::Item`.', syntax: `trait Container { type Item; fn first(&self) -> Option<&Self::Item>; }` },
+  { term: 'Supertrait', cat: 'Generics & traits', module: 7, desc: 'A trait that requires another: implementors must implement both.', syntax: `trait Pretty: Display { fn pretty(&self) -> String; }` },
+  { term: 'Blanket impl', cat: 'Generics & traits', module: 7, desc: 'An implementation for every type satisfying a bound, such as `impl<T: Display> ToString for T`.', syntax: `impl<T: Display> Pretty for T {}` },
+  { term: 'Orphan rule', cat: 'Generics & traits', module: 7, desc: 'You may implement a trait for a type only if the trait or the type is local to your crate. Newtypes work around it.', syntax: `struct W(Vec<String>);
+impl fmt::Display for W { /* ... */ }` },
+  { term: 'impl Trait', cat: 'Generics & traits', module: 7, desc: 'In argument position: shorthand for a generic. In return position: an opaque concrete type. Static dispatch both ways.', syntax: `fn f(x: impl Display) {}
+fn g() -> impl Iterator<Item = u32> { 0..3 }` },
+  { term: 'dyn Trait', cat: 'Generics & traits', module: 7, desc: 'A trait object: dynamic dispatch through a vtable, always behind a pointer.', syntax: `let v: Vec<Box<dyn Shape>> = vec![Box::new(Circle), Box::new(Square)];` },
+  { term: 'Dyn compatibility', cat: 'Generics & traits', module: 7, desc: 'Whether a trait can be made into a `dyn` object (formerly "object safety"). Methods must not return `Self` or have unconstrained generics.', syntax: `// Clone is not dyn-compatible
+// trait Shape { fn area(&self) -> f64; } is` },
+  { term: 'Trait upcasting', cat: 'Generics & traits', module: 7, desc: 'Coerce `&dyn Sub` to `&dyn Super` when `Sub: Super`.', since: 'Rust 1.86', syntax: `fn f(d: &dyn Dog) { greet(d) }   // greet takes &dyn Animal` },
+  { term: 'async fn in traits', cat: 'Generics & traits', module: 7, desc: 'Traits may declare `async fn` and return-position `impl Trait` directly. Such traits are not dyn-compatible by default.', since: 'Rust 1.75', syntax: `trait Feed { async fn latest(&self) -> f64; }` },
+  { term: 'GAT', cat: 'Generics & traits', module: 7, desc: 'Generic associated types: an associated type that takes its own parameters, such as a lifetime, enabling lending iterators.', since: 'Rust 1.65', syntax: `trait Lending { type Item<'a> where Self: 'a; }` },
+  { term: 'Operator traits', cat: 'Generics & traits', module: 7, desc: 'Operators are trait methods in `std::ops`: `Add`, `Sub`, `Mul`, `Neg`, `Index`, `AddAssign`, and so on.', syntax: `impl Add for V2 { type Output = V2; fn add(self, o: V2) -> V2 { /* ... */ } }` },
+  { term: 'PartialEq / Eq / PartialOrd / Ord / Hash', cat: 'Generics & traits', module: 7, desc: 'Comparison and hashing traits, derivable. `f64` has the partial forms only because of NaN.', syntax: `#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Id(u64);` },
+  { term: 'AsRef / Into', cat: 'Generics & traits', module: 7, desc: 'Flexible argument conversions: `AsRef<str>` borrows, `Into<String>` converts and may allocate.', syntax: `fn f(s: impl AsRef<str>) { s.as_ref(); }
+fn g(s: impl Into<String>) { let o: String = s.into(); }` },
+  // ---------- Lifetimes ----------
+  { term: 'Lifetime \'a', cat: 'Lifetimes', module: 7, desc: 'A label for how long a reference is valid. Annotations describe relationships between borrows and never extend a lifetime.', syntax: `fn longest<'a>(x: &'a str, y: &'a str) -> &'a str` },
+  { term: 'Lifetime elision', cat: 'Lifetimes', module: 7, desc: 'Rules that let you omit lifetimes: each input gets its own; one input lifetime goes to all outputs; `&self` goes to all outputs.', syntax: `fn first(s: &str) -> &str        // fn first<'a>(s: &'a str) -> &'a str` },
+  { term: '\'static', cat: 'Lifetimes', module: 7, desc: 'A reference valid for the whole program (like string literals). As a bound `T: \'static`, it means the type holds no short-lived borrows.', syntax: `let s: &'static str = "hi";
+fn spawn<T: Send + 'static>(t: T) {}` },
+  { term: 'Struct lifetime parameter', cat: 'Lifetimes', module: 7, desc: 'A struct holding a reference declares the lifetime, and cannot outlive the borrowed data.', syntax: `struct Parser<'a> { input: &'a str }
+impl<'a> Parser<'a> {}` },
+  { term: '\'_ (anonymous lifetime)', cat: 'Lifetimes', module: 7, desc: 'A placeholder for an elided lifetime, showing there is a borrow without naming it.', syntax: `impl Parser<'_> {}
+fn f(p: &Parser<'_>) {}` },
+  { term: 'Precise capturing use<..>', cat: 'Lifetimes', module: 7, desc: 'Lists exactly which generic parameters and lifetimes a returned `impl Trait` captures.', since: 'Rust 1.82', syntax: `fn f<'a>(x: &'a str) -> impl Iterator<Item = u8> + use<> { /* owned */ }` },
+  { term: 'Higher-ranked bound for<\'a>', cat: 'Lifetimes', module: 7, desc: 'A bound that must hold for every lifetime. `Fn(&str) -> &str` is sugar for it.', syntax: `F: for<'x> Fn(&'x str) -> &'x str` },
 ]

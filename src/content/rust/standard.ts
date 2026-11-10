@@ -323,4 +323,60 @@ match std::fs::read_to_string("cfg.toml") {
 }`,
     when: 'Any file, socket or pipe operation. Match on kinds for expected conditions such as "file not found".',
   },
+  // ---------------- Traits ----------------
+  {
+    name: 'From / Into / TryFrom / TryInto', header: 'core::convert', cat: 'Traits', module: 7,
+    summary: 'Standard conversions between types.',
+    what: '`From<T> for U` defines a lossless conversion, and `Into` comes for free. `TryFrom` / `TryInto` return a `Result` when conversion can fail. Accept `impl Into<String>` to take both `&str` and `String`. `FromStr` powers `parse`.',
+    code: `struct Meters(f64);
+impl From<f64> for Meters { fn from(v: f64) -> Self { Meters(v) } }
+let m: Meters = 3.5.into();
+let n = u8::try_from(300_i32);              // Err
+fn name(s: impl Into<String>) -> String { s.into() }`,
+    when: 'Public APIs that should accept several input forms, and error conversion with `?`.',
+  },
+  {
+    name: 'AsRef / Borrow / Deref', header: 'core::convert, core::ops', cat: 'Traits', module: 7,
+    summary: 'Cheap reference conversions.',
+    what: '`AsRef<T>` converts `&self` to `&T` cheaply (`String` to `&str`, `PathBuf` to `&Path`). `Borrow<T>` is stricter (hashing and equality must agree) and is what lets `HashMap<String, V>` be queried with `&str`. `Deref` powers smart pointers and auto-deref.',
+    code: `fn len(p: impl AsRef<std::path::Path>) -> usize { p.as_ref().as_os_str().len() }
+len("a/b"); len(String::from("a/b")); len(std::path::PathBuf::from("x"));`,
+    when: 'Function parameters that take "anything string-like" or "anything path-like".',
+  },
+  {
+    name: 'Debug / Display', header: 'core::fmt', cat: 'Traits', module: 7,
+    summary: 'Formatting traits for {:?} and {}.',
+    what: '`Debug` is derivable and intended for programmers. `Display` is hand-written and meant for users, and gives `to_string()` for free. Implement `fmt(&self, f: &mut Formatter) -> fmt::Result` with `write!`. `f.width()`, `f.alternate()` and `f.pad` support format specs.',
+    code: `use std::fmt;
+struct Px(f64);
+impl fmt::Display for Px {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{:.2}", self.0) }
+}
+println!("{} {}", Px(1.234), Px(2.0).to_string());`,
+    when: 'Every type you print. Always derive `Debug`, and implement `Display` for anything shown to users or used in error messages.',
+  },
+  {
+    name: 'PartialOrd / Ord / Ordering', header: 'core::cmp', cat: 'Traits', module: 7,
+    summary: 'Compare and order values.',
+    what: '`Ord` is a total order (`cmp` returns `Ordering::Less | Equal | Greater`), and `PartialOrd` allows incomparable values (NaN). `Ordering::then` and `then_with` chain comparisons, `max_by` / `min_by_key` use them, and `Reverse` flips an order. Derived `Ord` compares fields in order.',
+    code: `use std::cmp::{Ordering, Reverse};
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+struct Ver(u32, u32);
+let o = Ver(1, 2).cmp(&Ver(1, 10));          // Less
+v.sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.name.cmp(&b.name)));
+v.sort_by_key(|x| Reverse(x.len()));`,
+    when: 'Sorting, BTree keys, heaps and `max`/`min`. For floats, use `total_cmp`.',
+  },
+  {
+    name: 'Iterator::Item and impl Trait returns', header: 'core::iter', cat: 'Traits', module: 7,
+    summary: 'Return iterators without naming their type.',
+    what: 'A function can return `impl Iterator<Item = T>` and hide a long adapter chain. Add `+ \'_` (or `use<..>`) as needed to state what it borrows. Use `Box<dyn Iterator<Item = T> + \'_>` when different branches return different iterators.',
+    code: `fn big_evens<'a>(v: &'a [i32]) -> impl Iterator<Item = &'a i32> + 'a {
+    v.iter().filter(|x| **x % 2 == 0 && **x > 10)
+}
+fn pick(flag: bool) -> Box<dyn Iterator<Item = u32>> {
+    if flag { Box::new(0..3) } else { Box::new(vec![9, 8].into_iter()) }
+}`,
+    when: 'Library functions that produce sequences lazily and should not allocate a `Vec`.',
+  },
 ]
