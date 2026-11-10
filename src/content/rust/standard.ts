@@ -605,4 +605,61 @@ let (m, cv) = &*pair;
 let _ready = cv.wait_while(m.lock().unwrap(), |ready| !*ready).unwrap();`,
     when: 'Hand-written blocking queues and start-up synchronisation. In most programs a channel is simpler.',
   },
+  // ---------------- Async ----------------
+  {
+    name: 'Future / IntoFuture / poll_fn / ready', header: 'std::future', cat: 'Async', module: 12,
+    summary: 'The core async traits and small helpers.',
+    what: '`Future::poll` drives a future. `std::future::ready(v)` is an immediately-complete future, `poll_fn(|cx| ...)` builds a future from a closure, `pending()` never completes, and `IntoFuture` lets a builder type be `.await`ed directly. `Future` and `IntoFuture` are in the 2024 prelude.',
+    code: `use std::future::{ready, poll_fn};
+use std::task::Poll;
+let a = ready(5);
+let mut n = 0;
+let b = poll_fn(move |cx| {
+    n += 1;
+    if n < 3 { cx.waker().wake_by_ref(); Poll::Pending } else { Poll::Ready(n) }
+});`,
+    when: 'Writing adapters and tests. Application code almost always uses `async fn` and Tokio instead.',
+  },
+  {
+    name: 'tokio::spawn / JoinSet / spawn_blocking', header: 'tokio::task', cat: 'Async', module: 12,
+    summary: 'Run work as concurrent tasks (crate: tokio).',
+    what: '`spawn(fut)` schedules a `Send + \'static` future as a task and returns a `JoinHandle`. `JoinSet` collects many tasks and yields results as they complete. `spawn_blocking(f)` moves blocking code to a separate pool. `abort()` cancels a task.',
+    code: `let mut set = tokio::task::JoinSet::new();
+for sym in ["XAU", "EUR"] { set.spawn(async move { (sym, fetch(sym).await) }); }
+while let Some(Ok((sym, px))) = set.join_next().await { println!("{sym} {px}"); }
+let digest = tokio::task::spawn_blocking(move || sha(&bytes)).await?;`,
+    when: 'Fan-out of independent I/O jobs, background work and keeping blocking code off async workers.',
+  },
+  {
+    name: 'tokio::time: sleep / timeout / interval', header: 'tokio::time', cat: 'Async', module: 12,
+    summary: 'Timing without blocking a thread (crate: tokio).',
+    what: '`sleep(d).await` waits, `timeout(d, fut).await` returns `Err(Elapsed)` if the future is too slow, `interval(d)` yields ticks (call `tick().await`), and `Instant::now()` measures. All are cooperative and cancel-safe.',
+    code: `use tokio::time::{interval, timeout, Duration};
+let r = timeout(Duration::from_millis(250), fetch("XAU")).await;
+let mut t = interval(Duration::from_secs(1));
+loop { t.tick().await; heartbeat().await; }`,
+    when: 'Deadlines for network calls, periodic jobs, retry back-off.',
+  },
+  {
+    name: 'tokio::sync channels', header: 'tokio::sync', cat: 'Async', module: 12,
+    summary: 'mpsc, oneshot, broadcast and watch (crate: tokio).',
+    what: '`mpsc::channel(n)` is a bounded queue (`send(..).await` waits when full). `oneshot` sends exactly one value, which fits request/response. `broadcast` delivers every message to every subscriber, and `watch` holds the latest value and notifies changes. All are cancel-safe on the receive side.',
+    code: `let (tx, mut rx) = tokio::sync::mpsc::channel::<Order>(1024);
+let (reply_tx, reply_rx) = tokio::sync::oneshot::channel::<Fill>();
+tx.send(Order { reply: reply_tx, ..order }).await?;
+let fill = reply_rx.await?;`,
+    when: 'Actor-style designs, producer/consumer pipelines, and config or price broadcast.',
+  },
+  {
+    name: 'futures::StreamExt', header: 'futures', cat: 'Async', module: 12,
+    summary: 'Iterator-like adapters for async streams (crate: futures).',
+    what: '`next().await` pulls an item, and `map`, `filter`, `take`, `fold`, `collect`, `for_each`, `zip`, `chain`, `buffered(n)` and `buffer_unordered(n)` transform them. `stream::iter`, `unfold` and `repeat_with` create streams.',
+    code: `use futures::{stream, StreamExt};
+let total: f64 = stream::iter(syms)
+    .map(|s| async move { fetch(s).await })
+    .buffer_unordered(8)
+    .fold(0.0, |acc, px| async move { acc + px })
+    .await;`,
+    when: 'Bounded-concurrency fan-out and processing sequences of events as they arrive.',
+  },
 ]

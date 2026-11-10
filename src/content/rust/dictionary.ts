@@ -428,4 +428,33 @@ flag.store(true, Ordering::Release);` },
   { term: 'Rayon', cat: 'Concurrency', module: 11, desc: 'A data-parallelism crate: `par_iter()` and `par_chunks()` run iterator pipelines on a work-stealing thread pool.', syntax: `use rayon::prelude::*;
 let s: f64 = v.par_iter().sum();` },
   { term: 'Deadlock', cat: 'Concurrency', module: 11, desc: 'Threads waiting on each other\'s locks forever. Not prevented by the compiler: take locks in a consistent order and keep critical sections short.', syntax: `// A: lock(a) then lock(b)   B: lock(b) then lock(a)` },
+  // ---------- Async ----------
+  { term: 'async fn', cat: 'Async', module: 12, desc: 'Declares a function whose body is a state machine. Calling it returns a lazy future and does no work until polled.', syntax: `async fn fetch(sym: &str) -> f64 { 1.0 }` },
+  { term: '.await', cat: 'Async', module: 12, desc: 'Suspends the current async function until a future is ready, yielding to the runtime meanwhile. Only valid in async contexts.', syntax: `let px = fetch("XAU").await;
+let body = client.get(u).send().await?.text().await?;` },
+  { term: 'async block', cat: 'Async', module: 12, desc: 'An anonymous future. `async move { }` takes ownership of captures.', syntax: `let f = async move { n + 1 };` },
+  { term: 'Future', cat: 'Async', module: 12, desc: 'A trait with `poll(Pin<&mut Self>, &mut Context) -> Poll<Output>`. In the prelude since the 2024 edition.', since: 'Rust 2024', syntax: `fn work() -> impl Future<Output = u32> { async { 1 } }` },
+  { term: 'Poll / Waker / Context', cat: 'Async', module: 12, desc: '`Poll::Ready(v)` or `Pending`. The `Waker` in the `Context` tells the executor when a pending future can make progress.', syntax: `cx.waker().wake_by_ref();
+Poll::Pending` },
+  { term: 'Runtime / executor', cat: 'Async', module: 12, desc: 'Code that polls futures and handles I/O readiness and timers. The standard library has none: use Tokio, smol or embassy.', syntax: `#[tokio::main]
+async fn main() {}` },
+  { term: 'tokio::spawn', cat: 'Async', module: 12, desc: 'Runs a future as an independent task. The future must be `Send + \'static` on the multi-threaded runtime. Returns a `JoinHandle`.', syntax: `let h = tokio::spawn(async move { work(data).await });
+h.await?;` },
+  { term: 'spawn_blocking', cat: 'Async', module: 12, desc: 'Runs blocking or CPU-heavy code on a dedicated thread pool so it does not stall async workers.', syntax: `let h = tokio::task::spawn_blocking(|| hash_file(p)).await?;` },
+  { term: 'join! / try_join!', cat: 'Async', module: 12, desc: 'Poll several futures concurrently within one task and return all results. `try_join!` stops at the first error.', syntax: `let (a, b) = tokio::join!(f1(), f2());` },
+  { term: 'select!', cat: 'Async', module: 12, desc: 'Waits for the first of several futures and drops the others. Branches must be cancel-safe.', syntax: `select! { v = rx.recv() => {}, _ = sleep(d) => {} }` },
+  { term: 'timeout', cat: 'Async', module: 12, desc: 'Wraps a future with a deadline. Returns `Err(Elapsed)` if it takes too long, dropping the future.', syntax: `time::timeout(Duration::from_secs(1), fut).await` },
+  { term: 'Cancellation', cat: 'Async', module: 12, desc: 'Dropping a future stops it at its last `.await`. Code between awaits must tolerate being abandoned.', syntax: `drop(fut);
+handle.abort();` },
+  { term: 'Stream', cat: 'Async', module: 12, desc: 'The async counterpart of `Iterator`, from the `futures` crate. Consume with `StreamExt::next().await`.', syntax: `while let Some(x) = s.next().await {}` },
+  { term: 'buffer_unordered', cat: 'Async', module: 12, desc: 'Runs up to N futures from a stream concurrently, yielding results as they finish.', syntax: `stream::iter(urls).map(fetch).buffer_unordered(8)` },
+  { term: 'Pin / pin!', cat: 'Async', module: 12, desc: 'Guarantees a value will not move. Needed for self-referential state machines. `Box::pin` and `pin!` create pinned futures.', syntax: `let f = pin!(async { 1 });
+let b: Pin<Box<dyn Future<Output = u32>>> = Box::pin(async { 1 });` },
+  { term: 'Unpin', cat: 'Async', module: 12, desc: 'Marker for types that are safe to move even when pinned. Most types are `Unpin`, but `async` blocks are not.', syntax: `fn f<F: Future + Unpin>(f: F) {}` },
+  { term: 'Async channels', cat: 'Async', module: 12, desc: '`tokio::sync`: `mpsc` (bounded queue), `oneshot` (one reply), `broadcast` (fan-out) and `watch` (latest value).', syntax: `let (tx, mut rx) = mpsc::channel(16);
+tx.send(x).await?;` },
+  { term: 'tokio::sync::Mutex', cat: 'Async', module: 12, desc: 'A mutex whose `lock().await` can be held across awaits. Prefer a std mutex with a short, await-free critical section.', syntax: `let g = m.lock().await;` },
+  { term: 'JoinSet', cat: 'Async', module: 12, desc: 'A collection of spawned tasks awaited as they complete, and aborted when dropped.', syntax: `let mut set = JoinSet::new();
+set.spawn(work());
+while let Some(r) = set.join_next().await {}` },
 ]
