@@ -26,6 +26,7 @@
   --ts: #3178c6; --ts-ink: #2a64a8; --ts-on: #ffffff;
   --go: #00add8; --go-ink: #00799a; --go-on: #ffffff;
   --java: #cc0000; --java-ink: #a80000; --java-on: #ffffff;
+  --rust: #b7410e; --rust-ink: #94330a; --rust-on: #ffffff;
   --shadow: 0 1px 2px rgba(120, 70, 80, .06), 0 8px 28px rgba(120, 70, 80, .08);
 
   --f-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
@@ -54,6 +55,8 @@
     --py: #ffd43b; --py-ink: #ffd43b; --py-on: #2b2300;
     --ts: #3178c6; --ts-ink: #79aef0; --ts-on: #ffffff;
     --java: #e5483f; --java-ink: #ff837b; --java-on: #ffffff;
+  --rust: #d9622b; --rust-ink: #f09a6e; --rust-on: #ffffff;
+    --rust: #d9622b; --rust-ink: #f09a6e; --rust-on: #ffffff;
     --go: #00add8; --go-ink: #4fd0ef; --go-on: #06222b;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
     color-scheme: dark;
@@ -262,6 +265,7 @@ a { color: var(--brand-deep); }
 .code .bar .ts { color: #79aef0; }
 .code .bar .go { color: #4fd0ef; }
 .code .bar .java { color: #ff837b; }
+.code .bar .rust { color: #f09a6e; }
 .code .bar .cpp { color: #f2a6b3; }
 .compare-wrap { display: flex; flex-direction: column; gap: 10px; }
 .caption { font-size: 13px; color: var(--muted); margin-top: -10px; }
@@ -370,23 +374,28 @@ a { color: var(--brand-deep); }
 .lang-chip.ts { color: var(--ts-ink); }
 .lang-chip.go { color: var(--go-ink); }
 .lang-chip.java { color: var(--java-ink); }
+.lang-chip.rust { color: var(--rust-ink); }
 .lang-chip.python:hover, .lang-chip.python.on { border-color: var(--py); }
 .lang-chip.ts:hover, .lang-chip.ts.on { border-color: var(--ts); }
 .lang-chip.go:hover, .lang-chip.go.on { border-color: var(--go); }
 .lang-chip.java:hover, .lang-chip.java.on { border-color: var(--java); }
+.lang-chip.rust:hover, .lang-chip.rust.on { border-color: var(--rust); }
 .lang-chip.python.on { background: var(--py); color: var(--py-on); }
 .lang-chip.ts.on { background: var(--ts); color: var(--ts-on); }
 .lang-chip.go.on { background: var(--go); color: var(--go-on); }
 .lang-chip.java.on { background: var(--java); color: var(--java-on); }
+.lang-chip.rust.on { background: var(--rust); color: var(--rust-on); }
 .bridge .hint .py { color: var(--py-ink); font-weight: 700; }
 .bridge .hint .ts { color: var(--ts-ink); font-weight: 700; }
 .bridge .hint .go { color: var(--go-ink); font-weight: 700; }
 .bridge .hint .java { color: var(--java-ink); font-weight: 700; }
+.bridge .hint .rust { color: var(--rust-ink); font-weight: 700; }
 .bridge-note { border-left: 3px solid var(--line); padding-left: 12px; }
 .bridge-note.python { border-color: var(--py); }
 .bridge-note.ts { border-color: var(--ts); }
 .bridge-note.go { border-color: var(--go); }
 .bridge-note.java { border-color: var(--java); }
+.bridge-note.rust { border-color: var(--rust); }
 
 
 /* ================= Aurora's Learning Centre =================
@@ -828,3 +837,50 @@ a { color: var(--brand-deep); }
 :root[data-section="java"] .tok-ty { color: #7fd0e8; }
 :root[data-section="java"] .tok-fn { color: #f4d58d; }
 :root[data-section="java"] .tok-com { color: #728c99; }
+
+/* ================= Rust section: oxidised orange (#b7410e) with verdigris patina green on warm slate =================
+   Rust orange leads (buttons, active states, headings); patina green carries the "newer than the book" callouts and analogies.
+   In dark mode both are lifted so they stay readable on charcoal. */
+:root {
+  --rustc: #b7410e; --rustc-deep: #94330a; --rustc-light: #f2b394;
+  --rustp: #2f7d6d; --rustp-deep: #1f5f52;
+  --rustc-sheen: linear-gradient(115deg, #94330a 0%, #b7410e 34%, #2f7d6d 66%, #1f5f52 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --rustc: #d9622b; --rustc-deep: #f4a37c; --rustc-light: #f9c9b0; --rustp: #4fb09c; --rustp-deep: #86d4c3;
+    --rustc-sheen: linear-gradient(115deg, #c2521c 0%, #d9622b 34%, #3a9482 66%, #2f7d6d 100%); }
+}
+:root[data-theme="dark"] { --rustc: #d9622b; --rustc-deep: #f4a37c; --rustc-light: #f9c9b0; --rustp: #4fb09c; --rustp-deep: #86d4c3;
+  --rustc-sheen: linear-gradient(115deg, #c2521c 0%, #d9622b 34%, #3a9482 66%, #2f7d6d 100%); }
+
+.accent-rust { --acc: var(--rustc); --acc-ink: var(--rustc-deep); --acc-sheen: var(--rustc-sheen); }
+.lang-card.accent-rust { border-top: 4px solid var(--acc); }
+.accent-rust .lang-card-name { background: var(--acc-sheen); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 7s ease-in-out infinite; }
+
+:root[data-section="rust"] {
+  --brand: var(--rustc); --brand-deep: var(--rustc-deep); --brand-light: var(--rustc-light); --brand-sheen: var(--rustc-sheen);
+  --bg: #faf7f4; --paper: #fffdfb; --ink: #261c17; --muted: #706259; --line: #e8ddd5; --tint: #f6ebe3;
+  --code-bg: #231a16; --code-fg: #f4ece6;
+  --shadow: 0 1px 2px rgba(110, 50, 20, .06), 0 8px 28px rgba(110, 50, 20, .08);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-section="rust"]:not([data-theme="light"]) {
+    --bg: #181310; --paper: #221b17; --ink: #f3ebe5; --muted: #b3a498; --line: #3a2f28; --tint: #2b211c;
+    --code-bg: #130e0b; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+  }
+}
+:root[data-section="rust"][data-theme="dark"] {
+  --bg: #181310; --paper: #221b17; --ink: #f3ebe5; --muted: #b3a498; --line: #3a2f28; --tint: #2b211c;
+  --code-bg: #130e0b; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+}
+:root[data-section="rust"] .callout.new23,
+:root[data-section="rust"] .callout.analogy { border-color: var(--rustp); }
+:root[data-section="rust"] .callout.new23 .label,
+:root[data-section="rust"] .callout.analogy .label { color: var(--rustp-deep); }
+:root[data-section="rust"] .code .bar { color: #c9b6a8; border-bottom-color: rgba(255, 255, 255, .08); }
+:root[data-section="rust"] .code .bar .rust { color: #f4a37c; }
+:root[data-section="rust"] .stepper .src .ln { color: #7d6a5d; }
+:root[data-section="rust"] .tok-kw { color: #f4a37c; }
+:root[data-section="rust"] .tok-ty { color: #86d4c3; }
+:root[data-section="rust"] .tok-fn { color: #f4d58d; }
+:root[data-section="rust"] .tok-com { color: #8f7b6e; }
