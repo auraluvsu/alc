@@ -147,7 +147,7 @@ except ValueError as e:
       id: 'custom',
       title: 'Custom error types',
       blocks: [
-        { kind: 'analogy', text: "A generic \"something went wrong\" note is like an ambulance that only reports *emergency*. A good error type tells the dispatcher which kind: fire, flood, medical. With an **enum of error kinds**, callers can match on what went wrong and decide what to do: retry the network blip, tell the user about the typo, but give up on a corrupted file." },
+        { kind: 'analogy', text: "A generic \"something went wrong\" note is like an ambulance that only reports emergency. A good error type tells the dispatcher which kind: fire, flood, medical. With an **enum of error kinds**, callers can match on what went wrong and decide what to do: retry the network blip, tell the user about the typo, but give up on a corrupted file." },
         { kind: 'code', code: `use std::{fmt, io, num::ParseIntError};
 
 #[derive(Debug)]
@@ -217,7 +217,7 @@ impl std::error::Error for ConfigError {}`,
       id: 'from',
       title: 'From, boxing and error context',
       blocks: [
-        { kind: 'analogy', text: "Imagine a relay of postal services: each service stamps the parcel in its own style. At each border (function boundary), a **customs officer (`From`)** repackages the error in the next country's format, keeping the original inside. At the end you can open the parcel and read the whole journey: *could not load config → could not read file → No such file or directory*." },
+        { kind: 'analogy', text: "Imagine a relay of postal services: each service stamps the parcel in its own style. At each border (function boundary), a **customs officer (`From`)** repackages the error in the next country's format, keeping the original inside. At the end you can open the parcel and read the whole journey: could not load config → could not read file → No such file or directory." },
         { kind: 'code', code: `use std::error::Error;
 
 // Box<dyn Error> accepts anything implementing Error, via a blanket From impl
@@ -250,7 +250,7 @@ let n: i32 = s.parse().map_err(|e| format!("bad port {s:?}: {e}"))?;` },
           '`Box<dyn Error>` is the "any error" type: easy for applications and examples, at the cost that callers cannot match on kinds without `downcast_ref`. Add `+ Send + Sync` for use across threads.',
           '`impl From<&str> for Box<dyn Error>` (and `String`) means `Err("text".into())` works directly.',
           '`map_err` converts the error at one call site (`.map_err(MyError::Parse)?`), which is handy when a `From` impl would be too broad, such as two `ParseIntError`s that mean different things.',
-          'Context matters as much as the cause: "No such file or directory" is useless without the file name. Add context where the information is available: where you *know* what you were trying to do.',
+          'Context matters as much as the cause: "No such file or directory" is useless without the file name. Add context where the information is available: where you know what you were trying to do.',
         ] },
         { kind: 'pitfall', text: 'A blanket `impl<E: Error> From<E> for MyError` conflicts with the standard library\'s `impl<T> From<T> for T`, so it will not compile. Write one `From` impl per source type (or use `thiserror`\'s `#[from]`).' },
         { kind: 'check', q: 'Why does `?` work on a function returning `Result<T, Box<dyn Error>>` for both `io::Error` and `ParseIntError`?', options: ['Because both are strings', 'Because `Box<dyn Error>` implements `From` for any type that implements `Error`', 'Because `?` converts to `String`', 'It does not work'], answer: 1, hint: 'Look at what `?` calls on the error.', explain: 'The standard library provides `impl<E: Error> From<E> for Box<dyn Error>`, so any error type is boxed automatically by `?`.' },
@@ -297,7 +297,7 @@ fn main() -> Result<()> {
         { kind: 'list', items: [
           '**Libraries** return a specific error type (usually a `thiserror` enum) so callers can match on kinds and the dependency tree is clear.',
           '**Applications** (binaries) rarely match on error kinds. They report them. `anyhow::Result` with `.context(...)` gives readable chains with almost no code.',
-          '`anyhow::Error` is *not* an `Error` implementor itself (so it can be `From<E: Error>`). Convert at the boundary: libraries should not expose `anyhow` in their public API.',
+          '`anyhow::Error` is not an `Error` implementor itself (so it can be `From<E: Error>`). Convert at the boundary: libraries should not expose `anyhow` in their public API.',
           '`{e}` prints the top message, `{e:#}` prints the chain on one line, `{e:?}` prints the chain with a backtrace if `RUST_BACKTRACE=1`.',
           'Related crates: `eyre` and `color-eyre` (pretty reports), `miette` (diagnostics with source snippets), `snafu` (context selectors). The standard library only gives you the `Error` trait and `Box<dyn Error>`.',
           'Rule of thumb for any function: **can the caller do something specific about each failure?** If yes, return a precise enum. If not, return an opaque error with context, and let the caller report it.',

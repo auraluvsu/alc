@@ -17,7 +17,7 @@ export const r09: Module = {
       id: 'closures',
       title: 'Closures',
       blocks: [
-        { kind: 'analogy', text: "A closure is a **sticky note with instructions that remembers where it was written**. \"Add the tax rate to this price\" is a function, but \"add *the tax rate we have right now* to this price\" is a closure: it carries a copy (or a loan) of `tax_rate` with it wherever it goes. You can hand the note to somebody else, and it still works." },
+        { kind: 'analogy', text: "A closure is a **sticky note with instructions that remembers where it was written**. \"Add the tax rate to this price\" is a function, but \"add the tax rate we have right now to this price\" is a closure: it carries a copy (or a loan) of `tax_rate` with it wherever it goes. You can hand the note to somebody else, and it still works." },
         { kind: 'code', code: `let tax = 0.2;
 let add_tax = |price: f64| price * (1.0 + tax);          // captures \`tax\` by reference
 let double = |x| x * 2;                                    // types inferred from first use

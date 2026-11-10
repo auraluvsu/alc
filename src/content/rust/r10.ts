@@ -159,7 +159,7 @@ Arc::make_mut(&mut cow).push(3);                // other still sees [1, 2]; cow 
           'An `Rc` gives **immutable** access. To mutate shared data, combine it with interior mutability: `Rc<RefCell<T>>` (single thread) or `Arc<Mutex<T>>` (multiple threads) (next lesson, and module 11).',
           '`Rc::strong_count`, `Rc::ptr_eq`, `Rc::try_unwrap` (get the inner value if you are the last owner), `Rc::get_mut` (mutable access if unique) and `Rc::make_mut` (copy-on-write) are the useful associated functions. They are not methods, to avoid clashing with the inner type\'s methods.',
           'Reach for `Rc`/`Arc` when ownership really is shared: a graph, a cache, a config read by many tasks. If a clear owner exists, borrow instead. **Don\'t use `Rc` to escape the borrow checker** on ordinary code.',
-          'Cloning an `Rc` is one increment. Cloning the *contents* needs `(*rc).clone()` or `rc.as_ref().clone()`.',
+          'Cloning an `Rc` is one increment. Cloning the contents needs `(*rc).clone()` or `rc.as_ref().clone()`.',
         ] },
         { kind: 'compare',
           cpp: `auto a = std::make_shared<std::string>("x");   // shared_ptr: atomic counts always, even single-threaded

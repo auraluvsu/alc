@@ -72,7 +72,7 @@ h.join().unwrap();`,
       id: 'channels',
       title: 'Message passing with channels',
       blocks: [
-        { kind: 'analogy', text: "Instead of two cooks sharing one jar, they use a **conveyor belt between stations**. One side puts finished items on the belt (`send`), the other takes them off (`recv`). Once an item is on the belt, the sender no longer has it: ownership **moves** with the message, so nobody can touch it while it is in flight. The Go motto sums it up: *do not communicate by sharing memory; share memory by communicating*." },
+        { kind: 'analogy', text: "Instead of two cooks sharing one jar, they use a **conveyor belt between stations**. One side puts finished items on the belt (`send`), the other takes them off (`recv`). Once an item is on the belt, the sender no longer has it: ownership **moves** with the message, so nobody can touch it while it is in flight. The Go motto sums it up: do not communicate by sharing memory; share memory by communicating." },
         { kind: 'code', code: `use std::sync::mpsc;
 use std::thread;
 
@@ -174,7 +174,7 @@ static LOG: Mutex<Vec<String>> = Mutex::new(Vec::new());
 if let Ok(mut g) = LOG.try_lock() { g.push("x".into()); }` },
         { kind: 'list', items: [
           '`Arc<Mutex<T>>` is the standard pair for **shared mutable state across threads**: `Arc` for shared ownership and `Mutex` for exclusive access. (Single-threaded equivalent: `Rc<RefCell<T>>`.)',
-          'The data is *inside* the lock. In C++ or Java the mutex sits beside the data and you must remember to take it. Here the type system makes it impossible to reach the data without the lock.',
+          'The data is inside the lock. In C++ or Java the mutex sits beside the data and you must remember to take it. Here the type system makes it impossible to reach the data without the lock.',
           '`lock()` returns `Result<MutexGuard<T>, PoisonError<..>>`. A mutex is **poisoned** if a thread panicked while holding it. `.unwrap()` propagates that panic, and `.unwrap_or_else(|e| e.into_inner())` recovers the data. (`parking_lot` mutexes have no poisoning.)',
           '**Deadlocks are not prevented.** Two threads taking locks A then B and B then A will hang. Take locks in a consistent order, hold as few as possible, and never call unknown code (callbacks) while locked.',
           'Never hold a `std::sync::Mutex` guard across an `.await` in async code (module 12): use a short critical section or `tokio::sync::Mutex`.',
@@ -200,7 +200,7 @@ mu.Lock(); counter++; mu.Unlock()          // forget Unlock and you deadlock`,
       id: 'send-sync',
       title: 'Send and Sync',
       blocks: [
-        { kind: 'analogy', text: "Two stickers on every type. **`Send`** means *this can be handed to another thread*, like a parcel you can post. **`Sync`** means *several threads can look at it at the same time through shared references*, like a sign on the wall. A diary with a cheap lock (`Rc`) can be neither posted nor displayed. The compiler reads the stickers and refuses any program that moves an unsafe item across a thread boundary." },
+        { kind: 'analogy', text: "Two stickers on every type. **`Send`** means this can be handed to another thread, like a parcel you can post. **`Sync`** means several threads can look at it at the same time through shared references, like a sign on the wall. A diary with a cheap lock (`Rc`) can be neither posted nor displayed. The compiler reads the stickers and refuses any program that moves an unsafe item across a thread boundary." },
         { kind: 'code', code: `// Send:  T can be moved to another thread.
 // Sync:  &T can be shared with other threads.  (T: Sync  <=>  &T: Send)
 
@@ -250,7 +250,7 @@ unsafe impl Send for Handle {}                  // "I guarantee this raw pointer
       id: 'atomics',
       title: 'Atomics and memory ordering',
       blocks: [
-        { kind: 'analogy', text: "A `Mutex` is a bathroom with a lock. An **atomic** is a **single stamp on a shared sheet**: one indivisible action that no one can interrupt halfway. For a counter or a flag, you do not need a whole room. But if a *group* of things must change together, you need the room. The **memory ordering** says how much the rest of the kitchen must tidy up (make visible) around the stamp." },
+        { kind: 'analogy', text: "A `Mutex` is a bathroom with a lock. An **atomic** is a **single stamp on a shared sheet**: one indivisible action that no one can interrupt halfway. For a counter or a flag, you do not need a whole room. But if a group of things must change together, you need the room. The **memory ordering** says how much the rest of the kitchen must tidy up (make visible) around the stamp." },
         { kind: 'code', code: `use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread;

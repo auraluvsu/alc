@@ -66,7 +66,7 @@ template <std::totally_ordered T> ...                       // C++20 concepts, o
       id: 'traits',
       title: 'Traits and bounds',
       blocks: [
-        { kind: 'analogy', text: "A trait is a job description. \"Must be able to `summarise()`\" says nothing about *who* the worker is. Any type may apply by providing the methods (`impl Summary for Tweet`). A function that asks for `T: Summary` is hiring anyone qualified, and is guaranteed that every applicant can do the job. A **default method** is a duty the employer provides by default, which an applicant may override." },
+        { kind: 'analogy', text: "A trait is a job description. \"Must be able to `summarise()`\" says nothing about who the worker is. Any type may apply by providing the methods (`impl Summary for Tweet`). A function that asks for `T: Summary` is hiring anyone qualified, and is guaranteed that every applicant can do the job. A **default method** is a duty the employer provides by default, which an applicant may override." },
         { kind: 'code', code: `trait Summary {
     fn author(&self) -> String;                          // required
     fn summarise(&self) -> String {                      // default, may be overridden
@@ -192,7 +192,7 @@ fn area_dyn(s: &dyn Shape) -> f64 { s.area() }      // dynamic: vtable`,
       id: 'lifetimes',
       title: 'Lifetimes',
       blocks: [
-        { kind: 'analogy', text: "A lifetime is the **due date** stamped in a library book. When a function hands you a reference, the compiler asks: *whose book is this, and when is it due back?* Lifetime annotations (`'a`) do not change how long anything lives. They are labels that let the signature say \"the answer is borrowed from this argument, so it is only valid as long as that book stays out\"." },
+        { kind: 'analogy', text: "A lifetime is the **due date** stamped in a library book. When a function hands you a reference, the compiler asks: whose book is this, and when is it due back? Lifetime annotations (`'a`) do not change how long anything lives. They are labels that let the signature say \"the answer is borrowed from this argument, so it is only valid as long as that book stays out\"." },
         { kind: 'code', code: `// The returned reference lives no longer than the shorter of the two inputs
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() >= y.len() { x } else { y }
@@ -243,7 +243,7 @@ let s: &'static str = "always valid";
 fn spawnable<T: Send + 'static>(t: T) {}   // T owns its data: contains no short-lived borrows` },
         { kind: 'list', items: [
           'Lifetimes appear **only when references are involved**: in function signatures that return a reference and in structs/enums that hold one. Inside a function body the compiler infers everything.',
-          '`<\'a>` declares a lifetime *parameter*, like a type parameter. `&\'a T` says "a reference valid for at least `\'a`". The signature `fn f<\'a>(x: &\'a str) -> &\'a str` states that the output is borrowed from the input.',
+          '`<\'a>` declares a lifetime parameter, like a type parameter. `&\'a T` says "a reference valid for at least `\'a`". The signature `fn f<\'a>(x: &\'a str) -> &\'a str` states that the output is borrowed from the input.',
           'An annotation **never extends** a lifetime. It documents the relationship so the compiler can verify callers and the body.',
           '`\'static` means "can live for the entire program". String literals are `&\'static str`. `T: \'static` does **not** mean the value lives forever, only that it holds no non-static borrows, so `String` is `\'static`.',
           'A struct holding a reference cannot outlive it: `Parser<\'a>` is tied to its input. If the lifetime parameters spread through your code, consider owning the data (`String`, `Vec`) or using indices instead of references.',

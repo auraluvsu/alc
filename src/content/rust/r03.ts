@@ -84,7 +84,7 @@ impl Trade {
       id: 'enums',
       title: 'Enums and Option',
       blocks: [
-        { kind: 'analogy', text: "A struct says *this and this and this*. An enum says *this or that or the other*, and each choice may carry its own luggage. A parcel is either `Letter`, or `Box { weight }`, or `Pallet { count, weight }`. Once you know which kind it is, you know exactly what fields exist. There is no way to read a pallet's count from a letter." },
+        { kind: 'analogy', text: "A struct says this and this and this. An enum says this or that or the other, and each choice may carry its own luggage. A parcel is either `Letter`, or `Box { weight }`, or `Pallet { count, weight }`. Once you know which kind it is, you know exactly what fields exist. There is no way to read a pallet's count from a letter." },
         { kind: 'code', code: `enum Order {
     Market { sym: String, qty: u32 },          // named fields
     Limit { sym: String, qty: u32, px: f64 },

@@ -155,7 +155,7 @@ use std::fmt::Result as FmtResult;  // rename with as
 use crate::exchange::book::*;       // glob import (use sparingly)
 pub use self::book::Order;          // re-export: part of *this* module's public API` },
         { kind: 'list', items: [
-          '**Idiom:** import a *module* for functions (`use std::io; io::stdin()`), and the *type* itself for structs and enums (`use std::collections::HashMap;`). The first keeps the origin visible at the call site and the second keeps type names short.',
+          '**Idiom:** import a module for functions (`use std::io; io::stdin()`), and the type itself for structs and enums (`use std::collections::HashMap;`). The first keeps the origin visible at the call site and the second keeps type names short.',
           'To avoid a name clash, use `as` (`use std::fmt::Result as FmtResult`) or refer to the parent module in the path.',
           '`pub use` **re-exports** an item, so users of your crate see a tidy flat API while your internal layout stays free to change. Much of `std::prelude` works this way.',
           'Glob imports (`use x::*`) are fine in tests (`use super::*;`) and preludes, and discouraged elsewhere, since they hide where names come from.',
@@ -253,7 +253,7 @@ if cfg!(debug_assertions) { println!("debug build"); }   // runtime-looking, com
       id: 'profiles',
       title: 'Profiles, docs and publishing',
       blocks: [
-        { kind: 'analogy', text: "A profile is a dial between *fast to cook* and *fast to eat*. The `dev` profile is a microwave dinner: ready in seconds, but not as good. The `release` profile is slow-roasting: it takes time to prepare, and tastes far better. You choose by use, and Cargo lets you customise the dial." },
+        { kind: 'analogy', text: "A profile is a dial between fast to cook and fast to eat. The `dev` profile is a microwave dinner: ready in seconds, but not as good. The `release` profile is slow-roasting: it takes time to prepare, and tastes far better. You choose by use, and Cargo lets you customise the dial." },
         { kind: 'code', code: `# Cargo.toml
 [profile.dev]
 opt-level = 1               # a little optimisation so debug builds are tolerable

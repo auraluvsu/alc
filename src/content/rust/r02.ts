@@ -20,7 +20,7 @@ export const r02: Module = {
         { kind: 'list', items: [
           'Values with a size known at compile time (integers, tuples, arrays, structs of those) can live on the **stack**. Pushing and popping them costs almost nothing.',
           'Values that grow or whose size is only known at run time (`String`, `Vec`, `Box`) keep a small header on the stack (pointer, length, capacity) and their contents on the **heap**.',
-          'Every language has to answer one question: *who frees the heap memory, and when?* C: you, by hand (and you forget, or free twice). Java, Go and Python: a garbage collector, at some later time, at a runtime cost. C++: destructors, but nothing stops two owners sharing a raw pointer. **Rust: the compiler tracks a single owner at compile time and inserts the free for you.**',
+          'Every language has to answer one question: who frees the heap memory, and when? C: you, by hand (and you forget, or free twice). Java, Go and Python: a garbage collector, at some later time, at a runtime cost. C++: destructors, but nothing stops two owners sharing a raw pointer. **Rust: the compiler tracks a single owner at compile time and inserts the free for you.**',
           'The result is deterministic cleanup with no garbage collector, no runtime cost and no use-after-free, double free or dangling pointer in safe code.',
         ] },
         { kind: 'p', text: 'These are the three rules. Everything in this module is a consequence of them:' },
@@ -249,7 +249,7 @@ let mid = &a[1..4];`,
       id: 'nll',
       title: 'How the borrow checker thinks',
       blocks: [
-        { kind: 'analogy', text: "The borrow checker is a strict but fair building inspector. It does not mind how long a scaffold is *declared* to stand: it only cares how long it is actually *used*. As soon as a reference is not needed any more, the loan is returned, so you can reuse the ground right away." },
+        { kind: 'analogy', text: "The borrow checker is a strict but fair building inspector. It does not mind how long a scaffold is declared to stand: it only cares how long it is actually used. As soon as a reference is not needed any more, the loan is returned, so you can reuse the ground right away." },
         { kind: 'list', items: [
           '**Non-lexical lifetimes (NLL):** a borrow lasts from where it is created to its **last use**, not to the end of the block. That is why shared references in the earlier stepper stopped mattering after the `println!`.',
           '**Two-phase borrows:** `v.push(v.len())` compiles. The `&mut v` for `push` is reserved first and activated only after the argument `v.len()` (a shared read) is evaluated.',

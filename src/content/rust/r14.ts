@@ -17,7 +17,7 @@ export const r14: Module = {
       id: 'unsafe',
       title: 'Unsafe Rust',
       blocks: [
-        { kind: 'analogy', text: "Safe Rust is a **building with a safety inspector at every door**. `unsafe` is a sign that says *the inspector stays outside, and I personally promise that what happens in this room is safe*. The room still has walls and the rest of the building is still inspected. You are not allowed to do just anything: you are given exactly five extra tools, each with rules you must follow by yourself. Good Rust keeps these rooms tiny and puts a safe door in front of each one." },
+        { kind: 'analogy', text: "Safe Rust is a **building with a safety inspector at every door**. `unsafe` is a sign that says the inspector stays outside, and I personally promise that what happens in this room is safe. The room still has walls and the rest of the building is still inspected. You are not allowed to do just anything: you are given exactly five extra tools, each with rules you must follow by yourself. Good Rust keeps these rooms tiny and puts a safe door in front of each one." },
         { kind: 'code', code: `// The five "unsafe superpowers":
 // 1. Dereference a raw pointer      2. Call an unsafe function or method
 // 3. Access or modify a mutable static   4. Implement an unsafe trait   5. Access union fields
@@ -101,7 +101,7 @@ int* p = new int(1); delete p; *p = 2;   // undefined behaviour, compiles withou
       id: 'adv-traits',
       title: 'Advanced traits',
       blocks: [
-        { kind: 'analogy', text: "Basic traits are job descriptions. The **advanced** features are the finer print: a job description that comes with its own *named tools* (associated types), *sensible defaults* for the tools (default type parameters), a way to say *which department's* \"report\" you mean when two departments use the same word (fully qualified syntax), and a loophole for dressing a foreign type up in your own uniform (newtype) so you may give it a job." },
+        { kind: 'analogy', text: "Basic traits are job descriptions. The **advanced** features are the finer print: a job description that comes with its own named tools (associated types), sensible defaults for the tools (default type parameters), a way to say which department's \"report\" you mean when two departments use the same word (fully qualified syntax), and a loophole for dressing a foreign type up in your own uniform (newtype) so you may give it a job." },
         { kind: 'code', code: `// Associated types: one implementation per type, no extra generic parameter to repeat
 pub trait Iterator { type Item; fn next(&mut self) -> Option<Self::Item>; }
 // vs. a generic trait, which can be implemented many times for the same type
@@ -177,7 +177,7 @@ impl fmt::Display for Wrapper {
       id: 'adv-types',
       title: 'Advanced types',
       blocks: [
-        { kind: 'analogy', text: "Types are the **shipping labels** on every parcel. *Aliases* are nicknames for a long label. The *never* type is the label on a parcel that is never delivered, because the courier was lost (a `panic!`). *Dynamically sized types* are parcels whose size is only written on the box at the last moment, so you can only handle them by the **handle** (a reference or `Box`), never by value." },
+        { kind: 'analogy', text: "Types are the **shipping labels** on every parcel. Aliases are nicknames for a long label. The never type is the label on a parcel that is never delivered, because the courier was lost (a `panic!`). Dynamically sized types are parcels whose size is only written on the box at the last moment, so you can only handle them by the **handle** (a reference or `Box`), never by value." },
         { kind: 'code', code: `// Type aliases: a nickname, NOT a new type
 type Kilometres = i32;
 type Thunk = Box<dyn Fn() + Send + 'static>;
@@ -301,7 +301,7 @@ let g = move |x| x + n;                  // closure: carries n`,
       id: 'macros',
       title: 'Macros',
       blocks: [
-        { kind: 'analogy', text: "A function runs at **run time** on *values*. A macro runs at **compile time** on *code*: it is a **rubber stamp with blanks** that expands into real source before the compiler checks it. `macro_rules!` is a stamp you carve by showing the shapes of input it accepts and the code to produce. Procedural macros are a **tiny program you write that reads code and writes code**, like the `#[derive(Debug)]` you have been using since module 3." },
+        { kind: 'analogy', text: "A function runs at **run time** on values. A macro runs at **compile time** on code: it is a **rubber stamp with blanks** that expands into real source before the compiler checks it. `macro_rules!` is a stamp you carve by showing the shapes of input it accepts and the code to produce. Procedural macros are a **tiny program you write that reads code and writes code**, like the `#[derive(Debug)]` you have been using since module 3." },
         { kind: 'code', code: `// Declarative macro: pattern => template
 macro_rules! hashmap {
     // zero or more "key => value" pairs separated by commas, with an optional trailing comma

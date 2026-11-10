@@ -52,7 +52,7 @@ let mut a = Account::open("Aurora", 10_000).unwrap();
 // a.balance_cents = -5;              // error: field \`balance_cents\` is private
 a.withdraw(2_500).unwrap();` },
         { kind: 'list', items: [
-          '**Fields are private by default**, and privacy is per *module* (module 4). Put the type and its `impl` in one module and expose only what callers need with `pub`.',
+          '**Fields are private by default**, and privacy is per module (module 4). Put the type and its `impl` in one module and expose only what callers need with `pub`.',
           'A **smart constructor** (`open`) is the only way to build an `Account`, so every value starts valid. `&mut self` methods then keep it valid. This is how you "make illegal states unrepresentable".',
           'Return **borrows** from getters (`&str`, `&[T]`), not clones. Rust has no automatic getters/setters. Add one only when it is part of the API, and prefer **behaviour** (`withdraw`) over a raw setter (`set_balance`).',
           '**Newtypes** extend encapsulation to primitives: `struct Cents(i64)`, `struct UserId(u64)`, `struct Email(String)` (validated on creation). Passing a `UserId` where an `OrderId` is expected becomes a compile error, at zero runtime cost.',
@@ -78,7 +78,7 @@ impl Account { pub fn withdraw(&mut self, c: i64) -> Result<(), WithdrawError> {
       id: 'composition',
       title: 'Traits, composition and inheritance',
       blocks: [
-        { kind: 'analogy', text: "Inheritance is **\"a Dog is an Animal, so it gets all of Animal's insides\"**, and when the family tree grows, you inherit things you never wanted. Composition is **building a Dog from parts**: a `Barker`, a `Walker`, and a name tag. Each part is small and replaceable. Rust has no struct inheritance. Instead you describe *what something can do* with a trait, and *what it is made of* with fields." },
+        { kind: 'analogy', text: "Inheritance is **\"a Dog is an Animal, so it gets all of Animal's insides\"**, and when the family tree grows, you inherit things you never wanted. Composition is **building a Dog from parts**: a `Barker`, a `Walker`, and a name tag. Each part is small and replaceable. Rust has no struct inheritance. Instead you describe what something can do with a trait, and what it is made of with fields." },
         { kind: 'code', code: `// Behaviour: traits (like interfaces, with default methods)
 trait Describe {
     fn name(&self) -> String;
@@ -126,7 +126,7 @@ class Car { Engine engine; };              // composition`,
 impl Pet for Dog { ... }                // behaviour via traits
 // no "extends"`,
           note: 'Java and C++ give you both. Rust keeps only the half most style guides recommend: interfaces (traits) and composition.' },
-        { kind: 'pitfall', text: 'When you miss inheritance, ask what you were really reusing: *data* (embed a struct), *behaviour with defaults* (trait default methods), or *the ability to treat several types alike* (trait objects or an enum). Each has a clean Rust answer, and a clumsy `Deref` hack is never the right one.' },
+        { kind: 'pitfall', text: 'When you miss inheritance, ask what you were really reusing: data (embed a struct), behaviour with defaults (trait default methods), or the ability to treat several types alike (trait objects or an enum). Each has a clean Rust answer, and a clumsy `Deref` hack is never the right one.' },
         { kind: 'check', q: 'How do you share implementation between `Car` and `Truck` in Rust?', options: ['`Truck extends Car`', 'Compose a shared struct (for example `Engine`) in both, and share behaviour via trait default methods', 'Use `Deref` to inherit', 'Impossible'], answer: 1, hint: 'There is no `extends`.', explain: 'Shared state goes in an embedded struct, and shared behaviour in trait defaults or blanket impls.' },
       ],
     },
@@ -160,7 +160,7 @@ fn find<T: Component>(parts: &[Box<dyn Component>]) -> Option<&T> {
     parts.iter().find_map(|p| (p.as_ref() as &dyn Any).downcast_ref::<T>())   // upcast dyn Component -> dyn Any
 }` },
         { kind: 'list', items: [
-          '**The expression problem**: with a trait you can **add new types** (new `impl Shape for Triangle`) without touching old code, but adding a new *operation* means editing every impl. With an enum you can **add new operations** (another `match`) freely, but a new *variant* breaks every existing `match` until updated. Pick the axis that will change.',
+          '**The expression problem**: with a trait you can **add new types** (new `impl Shape for Triangle`) without touching old code, but adding a new operation means editing every impl. With an enum you can **add new operations** (another `match`) freely, but a new variant breaks every existing `match` until updated. Pick the axis that will change.',
           '**Use an `enum`** when the set of variants is closed and known to you (AST nodes, protocol messages, order types, state). You get exhaustiveness checks, no heap allocation and fast dispatch.',
           '**Use `dyn Trait`** when the set is **open** (plugins, user-supplied handlers, test doubles) or heterogeneous collections must be built at run time, and when you want to hide a big generic type or cut compile time.',
           '**Use generics (`T: Trait`, `impl Trait`)** by default for functions: static dispatch, inlining, and no allocation. The cost is code size, and a collection of generics holds only one concrete type.',
@@ -194,7 +194,7 @@ trait Shape { fn area(&self) -> f64; }          // open: dyn or generic`,
       id: 'state',
       title: 'The state pattern',
       blocks: [
-        { kind: 'analogy', text: "A blog post moves through **Draft, Pending review, Published**. In the classic object-oriented \"State\" pattern, the post hands each request to a **current state object** (\"what do I do when asked to publish?\") and the state either returns *itself* (nothing happens) or the *next* state. The post never needs an `if status == ...` chain, because each state knows its own rules." },
+        { kind: 'analogy', text: "A blog post moves through **Draft, Pending review, Published**. In the classic object-oriented \"State\" pattern, the post hands each request to a **current state object** (\"what do I do when asked to publish?\") and the state either returns itself (nothing happens) or the next state. The post never needs an `if status == ...` chain, because each state knows its own rules." },
         { kind: 'code', code: `pub struct Post {
     state: Option<Box<dyn State>>,          // Option so we can take() the state out and replace it
     content: String,
@@ -252,7 +252,7 @@ impl State for Published {
           { line: 5, note: 'Only `Published` returns the content, so calling it earlier would have returned an empty string.', memory: [{ name: 'content()', value: '"hello"' }] },
         ] },
         { kind: 'list', items: [
-          '**State as trait objects** is the textbook OO pattern. The post is the *context* and each state is a small type with its own behaviour. Adding a state means a new struct and an impl.',
+          '**State as trait objects** is the textbook OO pattern. The post is the context and each state is a small type with its own behaviour. Adding a state means a new struct and an impl.',
           '`self: Box<Self>` is a method receiver that takes ownership of the boxed state. After `request_review`, the old state value is gone, which models "the state transitions" accurately.',
           '`Option` plus `take()` is the idiom for swapping out a field you must consume: you cannot move out of `&mut self`, so you take it, transform it and put the next one back.',
           'The cost: invalid operations compile but do nothing at run time (approving a draft just returns `self`). The runtime checks live in the code and not in the type system.',
@@ -281,7 +281,7 @@ impl Status {
       id: 'typestate',
       title: 'Type-state, builders and other patterns',
       blocks: [
-        { kind: 'analogy', text: "The state pattern is a **door that politely does nothing** if you push it at the wrong time. **Type-state** is **a corridor with no door in the wrong place**: a draft post simply does not have a `publish` method, so the mistake cannot be typed. You encode the state in the *type*, and each transition consumes the old value and returns a value of the new type." },
+        { kind: 'analogy', text: "The state pattern is a **door that politely does nothing** if you push it at the wrong time. **Type-state** is **a corridor with no door in the wrong place**: a draft post simply does not have a `publish` method, so the mistake cannot be typed. You encode the state in the type, and each transition consumes the old value and returns a value of the new type." },
         { kind: 'code', code: `// Type-state: states are different types; invalid transitions do not compile
 pub struct DraftPost { content: String }
 pub struct PendingPost { content: String }

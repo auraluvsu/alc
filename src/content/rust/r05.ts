@@ -97,7 +97,7 @@ v.retain(|x| keep(x));`,
       id: 'strings',
       title: 'Strings and UTF-8',
       blocks: [
-        { kind: 'analogy', text: "Text is a string of beads where the beads have different widths: a plain `a` is one bead, `é` is two, a Japanese character is three, and an emoji is four. If someone asks for the third *bead* you can find it by counting, but asking for the third *centimetre* of the string may land in the middle of a bead. That is why Rust refuses to let you write `s[2]`." },
+        { kind: 'analogy', text: "Text is a string of beads where the beads have different widths: a plain `a` is one bead, `é` is two, a Japanese character is three, and an emoji is four. If someone asks for the third bead you can find it by counting, but asking for the third centimetre of the string may land in the middle of a bead. That is why Rust refuses to let you write `s[2]`." },
         { kind: 'code', code: `let mut s = String::new();             // owned, growable, UTF-8
 let a = "literal";                      // &'static str: a view into the binary
 let b = String::from("owned");
@@ -272,13 +272,13 @@ let Reverse((prio, name)) = heap.pop().unwrap();         // (1, "a")` },
       id: 'choosing',
       title: 'Choosing a collection',
       blocks: [
-        { kind: 'analogy', text: "Picking a collection is like picking a vehicle: a delivery van (`Vec`) handles most trips, a filing cabinet on wheels (`BTreeMap`) when order matters, and a lookup desk (`HashMap`) when you only ever ask for one thing by name. A sports car is no use in a field, so decide by the *journey*: how will I read, insert, remove, and in what order?" },
+        { kind: 'analogy', text: "Picking a collection is like picking a vehicle: a delivery van (`Vec`) handles most trips, a filing cabinet on wheels (`BTreeMap`) when order matters, and a lookup desk (`HashMap`) when you only ever ask for one thing by name. A sports car is no use in a field, so decide by the journey: how will I read, insert, remove, and in what order?" },
         { kind: 'list', items: [
-          '**Default to `Vec`.** Contiguous memory beats most fancier structures until you have thousands of elements *and* a profile saying otherwise. Even membership tests on a few dozen items are often faster in a `Vec` than in a `HashSet`.',
+          '**Default to `Vec`.** Contiguous memory beats most fancier structures until you have thousands of elements and a profile saying otherwise. Even membership tests on a few dozen items are often faster in a `Vec` than in a `HashSet`.',
           'Need lookup by key? `HashMap`. Need keys sorted or range queries? `BTreeMap`. Need uniqueness only? `HashSet` or `BTreeSet`.',
           'Need FIFO or a sliding window? `VecDeque`. Need "most urgent next"? `BinaryHeap`.',
           'Need a fixed number of items known at compile time? An array `[T; N]`: no heap allocation at all.',
-          'Need to keep insertion order *and* key lookup? The `indexmap` crate. Need a small sorted list searched by `binary_search`? A sorted `Vec`.',
+          'Need to keep insertion order and key lookup? The `indexmap` crate. Need a small sorted list searched by `binary_search`? A sorted `Vec`.',
           'For repeated lookups of strings, keys of type `&str` into a `HashMap<&str, _>` avoid allocating, as long as the source text outlives the map.',
           '**Measure** before swapping: write a benchmark with `criterion` or `divan` on realistic data sizes, in release mode.',
         ] },
