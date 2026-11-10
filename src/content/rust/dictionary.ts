@@ -107,4 +107,42 @@ greet(&s);          // &String -> &str` },
 let [x, y] = v.get_disjoint_mut([0, 3]).unwrap();` },
   { term: 'char boundary', cat: 'Slices', module: 2, desc: 'Byte offsets in a `&str` must fall on UTF-8 character boundaries, or slicing panics. `str::get` returns `None` instead.', syntax: `s.get(0..2)            // Option<&str>
 s.is_char_boundary(2)` },
+  // ---------- Structs and enums ----------
+  { term: 'struct', cat: 'Structs & enums', module: 3, desc: 'A product type: a group of named fields. Variants are named, tuple and unit structs.', syntax: `struct Trade { sym: String, px: f64 }
+struct Meters(f64);
+struct Marker;` },
+  { term: 'impl', cat: 'Structs & enums', module: 3, desc: 'Attaches methods and associated functions to a type. A type can have several `impl` blocks.', syntax: `impl Trade {
+    fn new(sym: &str) -> Self { /* ... */ }
+    fn px(&self) -> f64 { self.px }
+}` },
+  { term: 'self / &self / &mut self', cat: 'Structs & enums', module: 3, desc: 'The receiver: consume, read or modify. `Self` (capital) is the implementing type.', syntax: `fn into_sym(self) -> String
+fn notional(&self) -> f64
+fn scale(&mut self, k: u32)` },
+  { term: 'Associated function', cat: 'Structs & enums', module: 3, desc: 'A function in an `impl` without a receiver, called with `::`. Used for constructors such as `new`.', syntax: `let t = Trade::new("XAU");` },
+  { term: 'Struct update syntax', cat: 'Structs & enums', module: 3, desc: '`..other` fills the remaining fields from another value, moving non-`Copy` ones.', syntax: `let t2 = Trade { px: 1.0, ..t1 };` },
+  { term: 'Newtype', cat: 'Structs & enums', module: 3, desc: 'A tuple struct wrapping one value to create a distinct type with no runtime cost.', syntax: `struct UserId(u64);` },
+  { term: 'enum', cat: 'Structs & enums', module: 3, desc: 'A sum type: a value is exactly one of several variants, each of which may carry data.', syntax: `enum Order { Market { qty: u32 }, Cancel(u64), CancelAll }` },
+  { term: 'Option<T>', cat: 'Structs & enums', module: 3, desc: 'Optional value: `Some(T)` or `None`. Replaces null.', syntax: `let x: Option<i32> = Some(3);
+x.map(|v| v + 1).unwrap_or(0)` },
+  { term: 'derive', cat: 'Structs & enums', module: 3, desc: 'Generates trait implementations: `Debug`, `Clone`, `Copy`, `PartialEq`, `Eq`, `Hash`, `PartialOrd`, `Ord`, `Default`.', syntax: `#[derive(Debug, Clone, PartialEq, Default)]
+struct S { n: i32 }` },
+  { term: 'dbg!', cat: 'Structs & enums', module: 3, desc: 'Prints file, line, expression and value to stderr, then returns the value. Good for temporary debugging.', syntax: `let y = dbg!(x * 2) + 1;` },
+  { term: 'Default', cat: 'Structs & enums', module: 3, desc: 'A trait providing a default value, with `..Default::default()` filling unspecified fields.', syntax: `#[derive(Default)] struct Cfg { depth: u8, name: String }
+let c = Cfg { depth: 3, ..Default::default() };` },
+  // ---------- Pattern matching ----------
+  { term: 'match', cat: 'Pattern matching', module: 3, desc: 'Compares a value against patterns in order. It must be exhaustive, and it is an expression.', syntax: `match n { 0 => "zero", 1..=9 => "small", _ => "big" }` },
+  { term: 'Match guard', cat: 'Pattern matching', module: 3, desc: 'An `if` after a pattern adds a boolean condition to the arm.', syntax: `Some(x) if x > 0 => {}` },
+  { term: '@ binding', cat: 'Pattern matching', module: 3, desc: 'Binds a name to a value while also testing it against a sub-pattern.', syntax: `n @ 1..=9 => println!("{n}")` },
+  { term: 'Or-pattern |', cat: 'Pattern matching', module: 3, desc: 'Matches any one of several patterns. Can be nested inside other patterns.', syntax: `Some(1 | 2) | None => {}` },
+  { term: 'Wildcard _ and ..', cat: 'Pattern matching', module: 3, desc: '`_` ignores one value without binding it, and `..` ignores the remaining fields or elements.', syntax: `Order::Limit { qty, .. } => {}
+let [first, .., last] = a;` },
+  { term: 'Exclusive range pattern', cat: 'Pattern matching', module: 3, desc: '`a..b` in a pattern, matching `a <= x < b`.', since: 'Rust 1.80', syntax: `match n { 0..10 => "digit", _ => "more" }` },
+  { term: 'if let / while let', cat: 'Pattern matching', module: 3, desc: 'Run a block when a single pattern matches, once (`if let`) or repeatedly (`while let`).', syntax: `if let Some(x) = opt { }
+while let Some(t) = stack.pop() { }` },
+  { term: 'Slice pattern', cat: 'Pattern matching', module: 3, desc: 'Matches slices and arrays by shape. `rest @ ..` binds the remaining elements.', syntax: `match v { [] => 0, [x] => *x, [first, rest @ ..] => *first }` },
+  { term: 'matches!', cat: 'Pattern matching', module: 3, desc: 'A macro that returns whether a value matches a pattern (with an optional guard).', syntax: `matches!(order, Order::Cancel(_) | Order::CancelAll)` },
+  { term: 'Refutable / irrefutable', cat: 'Pattern matching', module: 3, desc: 'An irrefutable pattern always matches and may be used in `let`, `for` and parameters. A refutable one may fail and needs `match`, `if let`, `while let` or `let else`.', syntax: `let (a, b) = pair;          // irrefutable
+let Some(x) = o else { return };` },
+  { term: '#[non_exhaustive]', cat: 'Pattern matching', module: 3, desc: 'Marks a public enum or struct as extensible, so other crates must use a wildcard arm. Lets library authors add variants without a breaking change.', syntax: `#[non_exhaustive]
+pub enum Error { Io, Parse }` },
 ]

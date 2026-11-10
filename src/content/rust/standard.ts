@@ -100,4 +100,43 @@ assert_eq!(s.get(0..3), Some("h\u{e9}"));
 let pos = s.char_indices().nth(2).map(|(i, _)| i);   // byte offset of 3rd char`,
     when: 'Truncating or slicing text from users, files or the network. Direct `&s[a..b]` is fine for ASCII you control.',
   },
+  // ---------------- Option ----------------
+  {
+    name: 'Option combinators', header: 'core::option', cat: 'Option & Result', module: 3,
+    summary: 'map, and_then, unwrap_or, ok_or, filter, take: work with Option without matching.',
+    what: '`map(f)` transforms the inside, `and_then(f)` chains a step that itself returns an `Option`, `filter(p)` keeps it only if `p` holds, `unwrap_or(d)` / `unwrap_or_else(f)` / `unwrap_or_default()` provide a fallback, `ok_or(err)` turns it into a `Result`, `take()` leaves `None` behind and returns the old value, and `is_some_and(f)` / `is_none_or(f)` test it as a `bool`.',
+    code: `let s: Option<&str> = Some("42");
+let n: Option<i32> = s.and_then(|t| t.parse().ok());           // Some(42)
+let d = n.map(|x| x * 2).filter(|x| *x > 50).unwrap_or(0);     // 84
+let r: Result<i32, &str> = n.ok_or("missing");
+let big = n.is_some_and(|x| x > 40);`,
+    when: 'Any time you would write a one-arm `match` on an `Option`. Avoid `unwrap` and `expect` outside tests and genuinely impossible cases.',
+  },
+  {
+    name: 'Option::unwrap / expect', header: 'core::option', cat: 'Option & Result', module: 3,
+    summary: 'Assert that a value is present, or panic.',
+    what: '`unwrap()` panics with a generic message on `None` (or `Err`). `expect("msg")` panics with your message, which should say why it cannot happen. They are assertions, not error handling.',
+    code: `let first = v.first().expect("config always has one entry");
+let n: i32 = "12".parse().unwrap();            // fine in a quick script`,
+    when: 'Tests, examples, prototypes, and invariants you have already established. In library code and anything that handles input, return a `Result` instead (module 6).',
+  },
+  {
+    name: 'Default', header: 'core::default', cat: 'Traits', module: 3,
+    summary: 'A standard way to build a "zero" value, derivable for structs.',
+    what: '`#[derive(Default)]` fills each field with its own default (`0`, `false`, empty `String`, `None`). Combined with struct update syntax it gives named-argument-like construction.',
+    code: `#[derive(Debug, Default)]
+struct Config { depth: u8, verbose: bool, name: String }
+let c = Config { depth: 5, ..Default::default() };
+let empty: Vec<i32> = Default::default();`,
+    when: 'Types with many optional settings, and in generic code that needs "an empty one" (`mem::take`, `unwrap_or_default`).',
+  },
+  {
+    name: 'matches!', header: 'core::macros', cat: 'Macros', module: 3,
+    summary: 'Test a value against a pattern as a boolean.',
+    what: '`matches!(expr, pattern if guard)` expands to a `match` returning `true` or `false`. It works with or-patterns, ranges, nested enums and guards.',
+    code: `let ok = matches!(order, Order::Limit { qty, .. } if qty > 0);
+let is_digit = matches!(c, '0'..='9');
+let v: Vec<_> = orders.iter().filter(|o| matches!(o, Order::Cancel(_))).collect();`,
+    when: 'Filters and assertions over enum variants where a full `match` is noise.',
+  },
 ]
