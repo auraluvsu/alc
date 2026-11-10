@@ -482,4 +482,49 @@ struct Builder;` },
   { term: 'Newtype pattern', cat: 'OO design', module: 13, desc: 'A single-field tuple struct that creates a distinct, validated type at no runtime cost.', syntax: `struct Email(String);
 struct UserId(u64);` },
   { term: 'Strategy / Observer via closures', cat: 'OO design', module: 13, desc: 'Closures and `Vec<Box<dyn Fn>>` replace many class-based patterns.', syntax: `handlers: Vec<Box<dyn Fn(&Event)>>` },
+  // ---------- Unsafe ----------
+  { term: 'unsafe', cat: 'Unsafe', module: 14, desc: 'Unlocks five operations the compiler cannot check: dereferencing raw pointers, calling unsafe functions, accessing mutable statics, implementing unsafe traits and reading union fields. It does not disable borrow checking.', syntax: `unsafe { *ptr = 1; }
+unsafe fn f() {}
+unsafe impl Send for T {}` },
+  { term: 'Raw pointer', cat: 'Unsafe', module: 14, desc: '`*const T` and `*mut T`: pointers with no lifetime or aliasing guarantees. Create with `&raw const`, `&raw mut`, `as`, or `as_ptr()`.', since: 'Rust 1.82', syntax: `let p = &raw const x;
+let q = v.as_mut_ptr();` },
+  { term: 'Undefined behaviour (UB)', cat: 'Unsafe', module: 14, desc: 'What happens when unsafe code breaks the rules: dangling or misaligned pointers, data races, invalid values, aliasing violations. The compiler may assume it never occurs.', syntax: `// detect with: cargo +nightly miri test` },
+  { term: 'Safe abstraction', cat: 'Unsafe', module: 14, desc: 'A safe function or type whose implementation uses `unsafe` but whose interface cannot be misused. The goal of all unsafe code.', syntax: `// SAFETY: halves are disjoint and in bounds
+unsafe { from_raw_parts_mut(ptr, mid) }` },
+  { term: 'unsafe extern / FFI', cat: 'Unsafe', module: 14, desc: 'Declares foreign functions. In the 2024 edition the block is `unsafe extern`, and individual items may be marked `safe`.', since: 'Rust 2024', syntax: `unsafe extern "C" {
+    pub safe fn abs(x: i32) -> i32;
+    pub unsafe fn strlen(s: *const c_char) -> usize;
+}` },
+  { term: '#[repr(C)]', cat: 'Unsafe', module: 14, desc: 'Fixes a C-compatible memory layout. Also `repr(u8)`, `repr(transparent)` and `repr(align(N))`. Rust\'s default layout is unspecified.', syntax: `#[repr(C)] struct Header { tag: u8, len: u32 }` },
+  { term: '#[unsafe(no_mangle)]', cat: 'Unsafe', module: 14, desc: 'Exports a function under its plain name for C. In the 2024 edition the attribute must be wrapped in `unsafe(...)`.', since: 'Rust 2024', syntax: `#[unsafe(no_mangle)]
+pub extern "C" fn add(a: i32, b: i32) -> i32 { a + b }` },
+  { term: 'static mut', cat: 'Unsafe', module: 14, desc: 'A mutable global. Access needs `unsafe`, and taking a reference to it is denied by default in the 2024 edition. Prefer atomics, `Mutex` or `OnceLock`.', syntax: `static mut N: u32 = 0;
+unsafe { N += 1; }` },
+  { term: 'union', cat: 'Unsafe', module: 14, desc: 'Fields share memory, as in C. Reading a field is unsafe because you must know which one is valid.', syntax: `union U { i: u32, f: f32 }
+let x = unsafe { U { i: 1 }.f };` },
+  { term: 'MaybeUninit', cat: 'Unsafe', module: 14, desc: 'A wrapper for memory that may not be initialised yet, the safe way to handle uninitialised buffers.', syntax: `let mut b = MaybeUninit::<[u8; 4]>::uninit();` },
+  { term: 'transmute', cat: 'Unsafe', module: 14, desc: 'Reinterprets the bits of one type as another. Almost always avoidable: use `from_le_bytes`, `as` casts or `bytemuck`.', syntax: `let f: f32 = unsafe { mem::transmute(0x3f800000u32) };` },
+  // ---------- Advanced traits and types ----------
+  { term: 'Associated type vs generic parameter', cat: 'Advanced types', module: 14, desc: 'Use an associated type when each implementor has one natural choice (`Iterator::Item`) and a generic parameter when several are possible (`From<T>`).', syntax: `trait Iterator { type Item; }
+trait From<T> { fn from(t: T) -> Self; }` },
+  { term: 'Default type parameter', cat: 'Advanced types', module: 14, desc: 'A generic parameter with a default, such as `Add<Rhs = Self>`, so the common case stays short.', syntax: `trait Add<Rhs = Self> { type Output; fn add(self, r: Rhs) -> Self::Output; }` },
+  { term: 'Fully qualified syntax', cat: 'Advanced types', module: 14, desc: '`<Type as Trait>::item` chooses a specific trait\'s item when names clash or there is no `self` to infer from.', syntax: `<Dog as Animal>::baby_name()
+Pilot::fly(&person);` },
+  { term: 'Type alias', cat: 'Advanced types', module: 14, desc: 'Another name for an existing type. It is not a new type.', syntax: `type Result<T> = std::result::Result<T, MyError>;` },
+  { term: 'DST and fat pointer', cat: 'Advanced types', module: 14, desc: 'Dynamically sized types (`str`, `[T]`, `dyn Trait`) can only be used behind a pointer that also carries a length or vtable.', syntax: `&str      // pointer + length
+&dyn T    // pointer + vtable` },
+  { term: 'Sized / ?Sized', cat: 'Advanced types', module: 14, desc: 'Every generic parameter is `Sized` by default. `T: ?Sized` also accepts `str`, `[T]` and `dyn Trait` behind a reference.', syntax: `fn show<T: ?Sized + Display>(t: &T) {}` },
+  { term: 'Niche optimisation', cat: 'Advanced types', module: 14, desc: 'Types with unused bit patterns let `Option` reuse them, so `Option<Box<T>>` and `Option<&T>` are pointer-sized.', syntax: `size_of::<Option<Box<i32>>>() == size_of::<Box<i32>>()` },
+  { term: 'Zero-sized type', cat: 'Advanced types', module: 14, desc: 'A type with no data: `()`, unit structs, `PhantomData`. It takes no space and its operations cost nothing.', syntax: `struct Marker;   // size_of == 0` },
+  // ---------- Function pointers and macros ----------
+  { term: 'fn pointer type', cat: 'Functions & macros', module: 14, desc: 'The type `fn(i32) -> i32`, a pointer to a function. Non-capturing closures coerce to it, and it implements all `Fn*` traits.', syntax: `let f: fn(i32) -> i32 = |x| x + 1;` },
+  { term: 'Constructor as function', cat: 'Functions & macros', module: 14, desc: 'Tuple-struct and enum-variant constructors are functions, so they can be passed to `map`.', syntax: `(0..3).map(Status::Value).collect::<Vec<_>>()
+strs.iter().map(ToString::to_string)` },
+  { term: 'macro_rules!', cat: 'Functions & macros', module: 14, desc: 'Declarative macros: pattern arms that expand into code at compile time. Hygienic, and operating on token trees.', syntax: `macro_rules! sq { ($x:expr) => { $x * $x }; }` },
+  { term: 'Macro fragment specifiers', cat: 'Functions & macros', module: 14, desc: 'What a `$name:kind` can capture: `expr`, `ident`, `ty`, `pat`, `stmt`, `block`, `item`, `path`, `tt`, `literal`, `lifetime`, `vis`, `meta`.', syntax: `($name:ident : $t:ty) => { /* ... */ }` },
+  { term: 'Macro repetition', cat: 'Functions & macros', module: 14, desc: '`$( ... ),*` and `$( ... );+` match or emit a group repeatedly, with a separator and a count of `*`, `+` or `?`.', syntax: `$( m.insert($k, $v); )*` },
+  { term: 'Procedural macro', cat: 'Functions & macros', module: 14, desc: 'Rust code that transforms tokens at compile time: custom derive, attribute-like and function-like. Built with `syn` and `quote`.', syntax: `#[proc_macro_derive(Describe)]
+pub fn derive(input: TokenStream) -> TokenStream { /* ... */ }` },
+  { term: 'cargo expand', cat: 'Functions & macros', module: 14, desc: 'Shows the code after macro expansion. The main tool for understanding and debugging macros.', syntax: `cargo install cargo-expand
+cargo expand module::path` },
 ]

@@ -693,4 +693,46 @@ struct Config { depth: u8, verbose: bool, name: String }
 let c = Config { depth: 3, ..Default::default() };`,
     when: 'Optional-heavy structs. Use a builder when fields are interdependent or validation is needed.',
   },
+  // ---------------- Low level ----------------
+  {
+    name: 'mem::size_of / align_of / offset_of / swap', header: 'core::mem', cat: 'Low level', module: 14,
+    summary: 'Inspect layout and move values around.',
+    what: '`size_of::<T>()` and `align_of::<T>()` report layout. `offset_of!(Type, field)` gives a field\'s byte offset. `swap`, `replace`, `take` exchange values behind `&mut`, `drop` ends a value early, and `forget` leaks it. `size_of_val` handles unsized values.',
+    code: `use std::mem;
+assert_eq!(mem::size_of::<u64>(), 8);
+assert_eq!(mem::size_of::<Option<Box<u8>>>(), mem::size_of::<Box<u8>>());
+#[repr(C)] struct H { tag: u8, len: u32 }
+assert_eq!(mem::offset_of!(H, len), 4);`,
+    when: 'Checking struct size for cache lines, FFI layouts and understanding why a type is large.',
+  },
+  {
+    name: 'ptr and slice::from_raw_parts', header: 'core::ptr, core::slice', cat: 'Low level', module: 14,
+    summary: 'Raw pointer operations and views over raw memory.',
+    what: '`ptr.add(n)`, `ptr.read()`, `ptr.write(v)`, `ptr::null()`, `ptr.is_null()` and `ptr::copy_nonoverlapping` work on raw pointers. `slice::from_raw_parts(ptr, len)` and `from_raw_parts_mut` build a slice, with the caller guaranteeing validity, alignment and no aliasing. `NonNull<T>` is a non-null raw pointer.',
+    code: `let v = vec![1u32, 2, 3, 4];
+let s = unsafe { std::slice::from_raw_parts(v.as_ptr().add(1), 2) };   // [2, 3]
+// SAFETY: in bounds, aligned, and v outlives s.`,
+    when: 'Building data structures and FFI wrappers. Always wrap in a safe API and test under Miri.',
+  },
+  {
+    name: 'CString / CStr / c_char', header: 'std::ffi', cat: 'Low level', module: 14,
+    summary: 'Pass text to and from C.',
+    what: '`CString::new("text")` makes an owned NUL-terminated string (error if it contains an interior NUL), `.as_ptr()` passes it to C. `CStr::from_ptr(p)` borrows a C string, and `.to_str()` / `.to_string_lossy()` convert to Rust. C string literals `c"text"` produce a `&CStr`.',
+    code: `use std::ffi::{CString, CStr, c_char};
+let s = CString::new("hello").unwrap();
+let p: *const c_char = s.as_ptr();
+let back = unsafe { CStr::from_ptr(p) }.to_str().unwrap();
+let lit: &CStr = c"literal";`,
+    when: 'Any call across a C boundary. `bindgen` generates declarations from headers, and `cbindgen` makes headers from Rust.',
+  },
+  {
+    name: 'hint::black_box', header: 'core::hint', cat: 'Low level', module: 14,
+    summary: 'Stop the optimiser from deleting benchmark code.',
+    what: '`black_box(x)` returns `x` but tells the compiler to treat it as unknown, which prevents constant folding and dead-code removal in micro-benchmarks. `hint::spin_loop` hints a busy-wait, `unreachable_unchecked` is an unsafe optimisation hint, and `assert_unchecked` states an invariant to the optimiser.',
+    code: `use std::hint::black_box;
+let t = std::time::Instant::now();
+for i in 0..1_000_000 { black_box(i * 2); }
+println!("{:?}", t.elapsed());`,
+    when: 'Benchmarks. Prefer a harness such as `criterion` or `divan`, which handle this for you.',
+  },
 ]
