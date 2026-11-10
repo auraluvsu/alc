@@ -8,7 +8,7 @@ test('home page renders with all courses linked', async ({ page }) => {
   page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('/')
   await expect(page).toHaveTitle(/.+/)
-  for (const base of ['/tour', '/go', '/java', '/python', '/data', '/ml', '/dl', '/systems', '/intro'])
+  for (const base of ['/tour', '/go', '/java', '/rust', '/python', '/data', '/ml', '/dl', '/systems', '/intro'])
     await expect(page.locator(`a[href="${base}"]`).first()).toBeAttached()
   expect(errors).toEqual([])
 })

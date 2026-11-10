@@ -85,6 +85,18 @@ export const LANGUAGES: Language[] = [
     ],
   },
   {
+    id: 'rust',
+    name: 'Rust',
+    accent: 'accent-rust',
+    tagline: 'Rust 2024, following Klabnik & Nichols\'s The Rust Programming Language: ownership, borrowing, traits, lifetimes, smart pointers, fearless concurrency and async, with added modules on object-oriented design and advanced Rust.',
+    links: [
+      { label: 'Course', desc: 'The 14-module course with quizzes', to: '/rust' },
+      { label: 'Dictionary', desc: 'Searchable syntax and concepts', to: '/rust/reference' },
+      { label: 'The Standard', desc: 'The most useful standard library types and methods', to: '/rust/standard' },
+      { label: 'Design', desc: 'Design notes and experiments', to: '/rust/design' },
+    ],
+  },
+  {
     id: 'ai',
     name: 'ML & Data',
     accent: 'accent-ml',
