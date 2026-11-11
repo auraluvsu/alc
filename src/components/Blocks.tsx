@@ -189,6 +189,13 @@ export function BlockView({ b }: { b: Block }) {
     case 'compare': return <Compare b={b} />
     case 'check': return <Check b={b} />
     case 'stepper': return <Stepper b={b} />
+    case 'eq':
+      return <>{<div className="eq">{b.lines.map((l, i) => <div key={i}>{l}</div>)}</div>}{b.caption && <div className="caption"><Inline text={b.caption} /></div>}</>
+    case 'links':
+      return (
+        <div className="callout learnmore"><span className="label">Learn more</span>
+          <ul>{b.items.map((x) => <li key={x.url}><a href={x.url} target="_blank" rel="noopener noreferrer">{x.label}</a>{x.note && <> · <Inline text={x.note} /></>}</li>)}</ul></div>
+      )
   }
 }
 

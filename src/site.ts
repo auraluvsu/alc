@@ -97,6 +97,16 @@ export const LANGUAGES: Language[] = [
     ],
   },
   {
+    id: 'maths',
+    name: 'Advanced Maths',
+    accent: 'accent-maths',
+    tagline: 'The maths behind machine learning, with no code: functions and logarithms, probability and Bayes, statistics, vectors, matrices, eigenvectors and SVD, derivatives and gradient descent, ending in linear regression built from scratch in words.',
+    links: [
+      { label: 'Course', desc: 'The 9-module course with quizzes', to: '/maths' },
+      { label: 'Dictionary', desc: 'Concepts and notation, explained plainly', to: '/maths/reference' },
+    ],
+  },
+  {
     id: 'ai',
     name: 'ML & Data',
     accent: 'accent-ml',

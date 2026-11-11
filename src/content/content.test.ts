@@ -26,14 +26,24 @@ describe('course registry', () => {
   it.each(courses.map((c) => [c.id, c] as const))('%s has required fields', (_id, c) => {
     expect(c.base.startsWith('/')).toBe(true)
     expect(c.base.endsWith('/')).toBe(false)
-    for (const f of ['brand', 'edition', 'codeLabel', 'newLabel', 'stdName', 'dictSearchHint'] as const)
-      expect(c[f], f).toBeTruthy()
+    // A no-code course has no code label or standard library to name.
+    const required = c.noCode ? (['brand', 'edition', 'newLabel', 'dictSearchHint'] as const) : (['brand', 'edition', 'codeLabel', 'newLabel', 'stdName', 'dictSearchHint'] as const)
+    for (const f of required) expect(c[f], f).toBeTruthy()
     expect(c.modules.length).toBeGreaterThan(0)
     expect(c.others).not.toContain(c.mainLang)
   })
 })
 
 describe.each(courses.map((c) => [c.id, c] as const))('content: %s', (_id, c) => {
+  it('links blocks use https URLs, and no-code courses contain no code', () => {
+    for (const m of c.modules) for (const l of m.lessons) for (const b of l.blocks) {
+      if (b.kind === 'links') {
+        expect(b.items.length, `m${m.n}/${l.id} links`).toBeGreaterThan(0)
+        for (const x of b.items) { expect(x.url, `m${m.n}/${l.id} url`).toMatch(/^https:\/\//); expect(x.label.trim()).not.toBe('') }
+      }
+      if (c.noCode) expect(['code', 'compare', 'poly', 'stepper'], `m${m.n}/${l.id} has a ${b.kind} block`).not.toContain(b.kind)
+    }
+  })
   it('module numbers are unique and ascending', () => {
     const ns = c.modules.map((m) => m.n)
     expect(new Set(ns).size).toBe(ns.length)
