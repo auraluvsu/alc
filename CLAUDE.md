@@ -20,6 +20,7 @@ The npm package is still named `cpp-tour` because the project began as a C++ cou
 | Data Analytics | `/data` | 12 | `src/content/data` | `d01..` |
 | Machine Learning | `/ml` | 12 | `src/content/ml` | `l01..` |
 | Deep Learning | `/dl` | 12 | `src/content/dl` | `n01..` |
+| Advanced Maths (no code) | `/maths` | 9 | `src/content/maths` | `a01..` |
 
 Counts are as of writing; `src/courses/*.ts` is the source of truth.
 
@@ -145,3 +146,5 @@ If the course teaches a language not yet in `LangId` (`python|ts|go|java|cpp`), 
 The Rust course (`src/content/rust`, `src/courses/rust.ts`) is written: modules 1 to 12 follow The Rust Programming Language, and 13 to 14 are added (OO design, advanced Rust). `LangId` includes `rust`, and `highlight()` has a Rust tokenizer (lifetimes, attributes, raw strings, macro calls). The palette is rust orange with verdigris green. `poly` blocks and `CodeLang` deliberately have no Rust key, so Foundations is unchanged. `Inline` supports only backticks and `**bold**`, so avoid `*italics*` in content.
 
 The Java course (`src/content/java`, `src/courses/java.ts`) is written. Modules 1 to 12 follow the book's chapters, and 13 to 14 are added (OO design, modern concurrency). `java` is both the course's `mainLang` and a comparison language in other courses. `highlight()` has a Java-specific keyword list, and the palette is Java red with the logo's blue. A C course would need a new `LangId` and the plumbing listed under "Add a course".
+
+The Advanced Maths course (`src/content/maths`, `src/courses/maths.ts`) is written and has **no code**. It sets `noCode: true` on the `Course`, which changes three things: the dictionary shows `syntax` as plain notation (a serif `.notation` box, not a highlighted snippet), the Reference title reads "Concepts & notation", and `content.test.ts` skips the code-label and `stdName` requirements and fails if a lesson uses a `code`, `compare`, `poly` or `stepper` block. Two block kinds were added for it: `eq` (display equation, `lines[]` plus optional `caption`) and `links` ("Learn more" list of `{ label, url, note? }`, https only, opens in a new tab). Every lesson ends with a `links` block. There is no Standard (`standard: []`) and no Design tab (`design: false`); `mainLang: 'python'` is a placeholder that is never rendered. `cpp23` holds the "Going further" list and `tour` holds the part label ("Part III · Linear algebra"). Write formulas with Unicode (`²`, `√`, `Σ`, `∇`, `ᵀ`) and avoid `*` for multiplication, since `Inline` treats it as emphasis. The source outline is `MATHS.md`.

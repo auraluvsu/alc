@@ -18,6 +18,7 @@ The site is a React + TypeScript app built with Vite. All course content lives i
 | **Data Analytics** | `/data` | 12 | McKinney, *Python for Data Analysis* (3rd ed.), updated to pandas 3.1 | Turning raw market data into analysis: pandas, financial data, and analysis at scale with Polars, DuckDB and Arrow. |
 | **Machine Learning** | `/ml` | 12 | Géron, *Hands-On Machine Learning* (3rd ed.), Part I, updated to scikit-learn 1.9 | Modelling with scikit-learn, avoiding leakage and self-deception, validating financial models, and serving models from C++. |
 | **Deep Learning** | `/dl` | 12 | *Dive into Deep Learning* (d2l.ai), in PyTorch 2.15 | Building neural networks from the first neuron up, applied to financial time series, and deploying models with `torch.export`, ONNX Runtime and LibTorch. |
+| **Advanced Maths** | `/maths` | 9 | Written for this site, following the topics in `MATHS.md` | A no-code course in the maths behind machine learning: functions and logarithms, probability and Bayes, statistics, vectors, matrices, eigenvectors, SVD and PCA, derivatives, gradient descent, and a capstone that builds linear regression in words. Each lesson ends with links to learn more. |
 
 The courses are meant to be read in order within each subject. The three ML & Data courses (Data Analytics → Machine Learning → Deep Learning) form a sequence. Foundations is the recommended starting point for anyone new to programming. Developers who already know another language get notes in each lesson comparing it to Python, TypeScript, Go, Java and C++.
 

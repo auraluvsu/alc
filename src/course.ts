@@ -24,6 +24,8 @@ export type Course = {
   stdName: string              // "the C++ standard library"
   bridges: Record<number, Partial<Record<LangId, string>>>
   progressKey: string
+  /** A course with no code: the dictionary shows notation instead of a highlighted snippet. */
+  noCode?: boolean
   /** Show the Design tab (default true). */
   design?: boolean
   chapterLabel: string         // 'Tour ch.' / 'Book ch.'

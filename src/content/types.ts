@@ -31,6 +31,10 @@ export type Block =
       explain: string
     }
   | { kind: 'stepper'; title: string; code: string[]; steps: Step[] }
+  /** Display equation or worked line of maths, set apart from the prose. `caption` explains it in words. */
+  | { kind: 'eq'; lines: string[]; caption?: string }
+  /** "Learn more" links for the lesson's topics. `note` says what the page is good for. */
+  | { kind: 'links'; items: { label: string; url: string; note?: string }[] }
 
 export type Lesson = { id: string; title: string; blocks: Block[] }
 

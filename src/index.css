@@ -884,3 +884,52 @@ a { color: var(--brand-deep); }
 :root[data-section="rust"] .tok-ty { color: #86d4c3; }
 :root[data-section="rust"] .tok-fn { color: #f4d58d; }
 :root[data-section="rust"] .tok-com { color: #8f7b6e; }
+
+/* ---------- No-code courses: display equations, notation, "learn more" links ---------- */
+.eq { font-family: var(--f-display, Georgia, serif); font-size: 1.15rem; line-height: 1.7; text-align: center; padding: 14px 16px; margin: 4px 0; background: var(--tint); border-radius: 12px; overflow-x: auto; font-variant-numeric: lining-nums; }
+.notation { background: var(--tint); border-radius: 12px; padding: 10px 14px; font-family: var(--f-display, Georgia, serif); font-size: 1.05rem; line-height: 1.6; overflow-x: auto; white-space: pre-wrap; }
+.notation .nl { display: block; font-family: inherit; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800; color: var(--brand-deep); font-family: var(--f-body, system-ui, sans-serif); }
+.callout.learnmore { border-style: dashed; }
+.callout.learnmore .label { color: var(--brand-deep); }
+.callout.learnmore ul { margin: 0; padding-left: 20px; }
+.callout.learnmore a { overflow-wrap: anywhere; }
+
+/* ================= Maths section: ink indigo (#3b3fa0) with brass (#a87420) on cool paper =================
+   Indigo leads (buttons, active states, headings); brass carries the "going further" callouts and analogies.
+   In dark mode both are lifted so they stay readable on deep navy. */
+:root {
+  --mathc: #3b3fa0; --mathc-deep: #2c2f84; --mathc-light: #b9bbf0;
+  --mathp: #a87420; --mathp-deep: #7d5513;
+  --mathc-sheen: linear-gradient(115deg, #2c2f84 0%, #3b3fa0 34%, #a87420 66%, #7d5513 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --mathc: #7b80e8; --mathc-deep: #a9adf5; --mathc-light: #cfd1fa; --mathp: #d9a24a; --mathp-deep: #ecc788;
+    --mathc-sheen: linear-gradient(115deg, #5f64d6 0%, #7b80e8 34%, #d9a24a 66%, #b8842c 100%); }
+}
+:root[data-theme="dark"] { --mathc: #7b80e8; --mathc-deep: #a9adf5; --mathc-light: #cfd1fa; --mathp: #d9a24a; --mathp-deep: #ecc788;
+  --mathc-sheen: linear-gradient(115deg, #5f64d6 0%, #7b80e8 34%, #d9a24a 66%, #b8842c 100%); }
+
+.accent-maths { --acc: var(--mathc); --acc-ink: var(--mathc-deep); --acc-sheen: var(--mathc-sheen); }
+.lang-card.accent-maths { border-top: 4px solid var(--acc); }
+.accent-maths .lang-card-name { background: var(--acc-sheen); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 7s ease-in-out infinite; }
+
+:root[data-section="maths"] {
+  --brand: var(--mathc); --brand-deep: var(--mathc-deep); --brand-light: var(--mathc-light); --brand-sheen: var(--mathc-sheen);
+  --bg: #f6f7fb; --paper: #fdfdff; --ink: #1b1d33; --muted: #5f6280; --line: #dfe1ee; --tint: #eceefa;
+  --shadow: 0 1px 2px rgba(40, 45, 120, .06), 0 8px 28px rgba(40, 45, 120, .08);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-section="maths"]:not([data-theme="light"]) {
+    --bg: #111325; --paper: #1a1d35; --ink: #eceefb; --muted: #a3a7c8; --line: #2d3156; --tint: #22264a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+  }
+}
+:root[data-section="maths"][data-theme="dark"] {
+  --bg: #111325; --paper: #1a1d35; --ink: #eceefb; --muted: #a3a7c8; --line: #2d3156; --tint: #22264a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .3);
+}
+:root[data-section="maths"] .callout.new23,
+:root[data-section="maths"] .callout.analogy { border-color: var(--mathp); }
+:root[data-section="maths"] .callout.new23 .label,
+:root[data-section="maths"] .callout.analogy .label { color: var(--mathp-deep); }
+:root[data-section="maths"] .eq { border-left: 4px solid var(--mathp); }
