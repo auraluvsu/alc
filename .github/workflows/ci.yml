@@ -52,7 +52,17 @@ jobs:
       - run: npm ci
       - uses: actions/download-artifact@v4
         with: { name: dist, path: dist }
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+      # System libraries come from apt, whose mirrors are occasionally unreachable from the runner.
+      # ubuntu-latest already ships most of them, so retry a few times and carry on if apt stays down.
+      - name: Install Chromium system dependencies (best effort)
+        continue-on-error: true
+        run: |
+          for i in 1 2 3; do
+            npx playwright install-deps chromium && exit 0
+            echo "apt attempt $i failed; retrying in 15s"; sleep 15
+          done
+          exit 1
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
