@@ -42,7 +42,7 @@ npm run check          # lint + typecheck + test + build + verify:build (everyth
 
 - Single test file: `npx vitest run src/progress.test.ts` (add `-t "name"` to filter).
 - `npm install` installs a **pre-push hook** (simple-git-hooks) running lint, typecheck and unit tests. It does not run build or e2e.
-- CI (`.github/workflows/ci.yml`, Node 22): `static-and-unit` (lint, typecheck, coverage) → `build` (build, verify:build, build:artifact) → `e2e` (Playwright on the built `dist`). Vercel handles deploys; CI doesn't deploy.
+- CI (`.github/workflows/ci.yml`, Node 22): `static-and-unit` (lint, typecheck, coverage) → `build` (build, verify:build, build:artifact). The Playwright e2e job was removed because the runner could not install Chromium; run `npm run test:e2e` locally. Vercel handles deploys; CI doesn't deploy.
 
 ## Architecture
 
