@@ -88,7 +88,7 @@ export const a07: Module = {
         { kind: 'check', q: 'What is the derivative of 3x⁴ - 5x + 2?', options: ['12x³ - 5', '12x³ - 5x', '3x³ - 5', '12x⁴ - 5'], answer: 0, hint: 'Power rule on each term; the constant vanishes.', explain: 'd/dx 3x⁴ = 12x³, d/dx (-5x) = -5, and d/dx 2 = 0.' },
         { kind: 'check', q: 'What is d/dx of x · ln x?', options: ['1/x', 'ln x', 'ln x + 1', 'x'], answer: 2, hint: 'Product rule: 1 · ln x + x · (1/x).', explain: 'The product rule gives ln x + x · (1 / x) = ln x + 1.' },
         { kind: 'links', items: [
-          { label: '3Blue1Brown: Derivative formulas through geometry', url: 'https://www.3blue1brown.com/lessons/derivative-formulas-geometrically', note: 'why the power, sum and product rules hold, pictorially' },
+          { label: '3Blue1Brown: Derivative formulas through geometry', url: 'https://www.3blue1brown.com/lessons/derivatives-power-rule', note: 'why the power, sum and product rules hold, pictorially' },
           { label: 'Paul\'s Online Notes: Differentiation formulas and the product rule', url: 'https://tutorial.math.lamar.edu/Classes/CalcI/DerivativeIntro.aspx', note: 'worked problems for each rule' },
           { label: 'Khan Academy: Basic differentiation rules', url: 'https://www.khanacademy.org/math/differential-calculus', note: 'practice for the power, product and quotient rules' },
         ] },

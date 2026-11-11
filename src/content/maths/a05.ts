@@ -66,7 +66,6 @@ export const a05: Module = {
         { kind: 'links', items: [
           { label: '3Blue1Brown: Matrix multiplication as composition', url: 'https://www.3blue1brown.com/lessons/matrix-multiplication', note: 'why the multiplication rule looks the way it does' },
           { label: 'Khan Academy: Matrix multiplication', url: 'https://www.khanacademy.org/math/linear-algebra', note: 'definitions, properties and practice' },
-          { label: 'Matrix multiplication calculator and animation (matrixmultiplication.xyz)', url: 'https://matrixmultiplication.xyz/', note: 'watch rows meet columns step by step' },
         ] },
       ],
     },
