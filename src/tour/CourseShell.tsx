@@ -264,7 +264,7 @@ function Reference() {
     <div className="col wide">
       <header className="mod-head">
         <span className="eyebrow">Reference dictionary</span>
-        <h1>Syntax &amp; concepts</h1>
+        <h1>{course.noCode ? 'Concepts & notation' : 'Syntax & concepts'}</h1>
         <p className="summary">{DICT.length} entries covering all {course.modules.length} modules, written for quick lookup mid-project. Press <code>/</code> to search.</p>
       </header>
       <div className="ref-tools">
@@ -285,7 +285,7 @@ function Reference() {
                 </span>
               </div>
               <p className="desc"><Inline text={d.desc} /></p>
-              <Code code={d.syntax} label={d.cat} />
+              {course.noCode ? <div className="notation"><span className="nl">{d.cat}</span>{d.syntax}</div> : <Code code={d.syntax} label={d.cat} />}
             </div>
           ))}
         </div>
