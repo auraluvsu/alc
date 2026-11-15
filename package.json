@@ -25,6 +25,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
     "@capacitor/cli": "^8.6.2",
     "@eslint/js": "^9.25.0",
     "@fontsource/bodoni-moda": "^5.3.0",

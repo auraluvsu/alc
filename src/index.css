@@ -527,6 +527,13 @@ a { color: var(--brand-deep); }
 .back-home { font-size: 12.5px; font-weight: 700; color: var(--muted); text-decoration: none; padding: 0 8px; }
 .back-home:hover { color: var(--jade-ink); }
 /* phones: menus span the bar (the sticky bar is their containing block) instead of hanging off their button */
+/* phones: the bars scroll away with the page instead of staying pinned (relative keeps them the menus' containing block) */
+@media (max-width: 880px) {
+  .site-bar { position: relative; top: auto; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+  .topbar { position: relative; top: auto; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+  /* with the module menu open the bar must stay put so Close remains reachable */
+  .topbar.menu-open { position: sticky; top: 0; }
+}
 @media (max-width: 1000px) {
   /* the nav wraps here, so anchor menus to the full-width bar instead of their button */
   .lang-dd { position: static; }

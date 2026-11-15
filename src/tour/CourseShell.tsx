@@ -55,7 +55,7 @@ function Shell({ sub }: { sub: string }) {
 
   return (
     <div className="shell">
-      <header className="topbar">
+      <header className={'topbar' + (menu ? ' menu-open' : '')}>
         <div className="topbar-left">
           <a href={to('/')} className="topbar-home" aria-label="Back to Aurora's Learning Centre">
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
