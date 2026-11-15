@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">alc</string>
+    <string name="title_activity_main">alc</string>
+    <string name="package_name">com.nasir.alc</string>
+    <string name="custom_url_scheme">com.nasir.alc</string>
+</resources>
