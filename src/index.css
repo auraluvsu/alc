@@ -331,7 +331,7 @@ a { color: var(--brand-deep); }
 
 /* reference */
 .ref-tools { display: flex; flex-direction: column; gap: 12px; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 10px; z-index: 5; }
-@media (max-width: 880px) { .ref-tools { top: calc(57px + env(safe-area-inset-top, 0px)); } }
+@media (max-width: 880px) { .ref-tools { position: static; } }
 .search {
   width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; font-size: 16px;
 }
