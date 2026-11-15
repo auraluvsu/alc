@@ -1,0 +1,47 @@
+name: Lines of code
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count .ts and .tsx lines
+        run: |
+          # Only tracked files, so node_modules and build output are never included.
+          # Config files (*.config.ts) and type declarations (*.d.ts) are skipped.
+          files=$(git ls-files '*.ts' '*.tsx' | grep -vE '(\.config\.ts|\.d\.ts)$')
+
+          count() { [ -n "$1" ] && echo "$1" | xargs cat | wc -l || echo 0; }
+          ts=$(count "$(echo "$files" | grep -E '\.ts$')")
+          tsx=$(count "$(echo "$files" | grep -E '\.tsx$')")
+          blank=$(echo "$files" | xargs cat | grep -cE '^\s*$' || true)
+          total=$((ts + tsx))
+
+          {
+            echo "## Lines of code"
+            echo
+            echo "| | Files | Lines |"
+            echo "|---|---:|---:|"
+            echo "| \`.ts\` | $(echo "$files" | grep -cE '\.ts$') | $ts |"
+            echo "| \`.tsx\` | $(echo "$files" | grep -cE '\.tsx$') | $tsx |"
+            echo "| **Total** | **$(echo "$files" | wc -l)** | **$total** |"
+            echo
+            echo "$((total - blank)) lines excluding blank lines."
+            echo
+            echo "<details><summary>Largest files</summary>"
+            echo
+            echo '```'
+            echo "$files" | xargs wc -l | grep -v ' total$' | sort -rn | head -10
+            echo '```'
+            echo "</details>"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
